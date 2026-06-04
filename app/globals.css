@@ -1,0 +1,360 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════
+   DESIGN SYSTEM — CSS CUSTOM PROPERTIES
+═══════════════════════════════════════ */
+
+:root {
+  /* Light Mode — Parchment Manuscript */
+  --bg:          #F5EDD8;
+  --bg-surface:  #EDE0C4;
+  --bg-elevated: #FAF6EE;
+  --bg-overlay:  rgba(245, 237, 216, 0.94);
+
+  --text-primary:   #26211D;
+  --text-secondary: #4A3A2C;
+  --text-muted:     #7A6A58;
+  --text-faint:     #A09080;
+
+  --accent:      #B08050;
+  --accent-warm: #C4A87A;
+  --accent-hot:  #D4AC5A;
+  --accent-rgb:  176, 128, 80;
+
+  --border:        rgba(160, 130, 90, 0.25);
+  --border-strong: rgba(160, 130, 90, 0.45);
+
+  --shadow-sm: 0 1px 3px rgba(38, 33, 29, 0.08);
+  --shadow-md: 0 4px 16px rgba(38, 33, 29, 0.10);
+  --shadow-lg: 0 12px 40px rgba(38, 33, 29, 0.14);
+  --shadow-xl: 0 24px 64px rgba(38, 33, 29, 0.18);
+
+  --ease-slow: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration:  0.4s;
+
+  --nav-h: 72px;
+
+  --feather-color: #8A5E2A;  /* dark warm gold — visible on parchment */
+}
+
+.dark {
+  /* Dark Mode — Leather-bound Book by Candlelight */
+  --bg:          #0A0806;
+  --bg-surface:  #1C1612;
+  --bg-elevated: #120E0A;
+  --bg-overlay:  rgba(10, 8, 6, 0.94);
+
+  --text-primary:   #E8DCC8;
+  --text-secondary: #C8B896;
+  --text-muted:     #8A7A6A;
+  --text-faint:     #5A4A3A;
+
+  --accent:      #C9A96E;
+  --accent-warm: #B89060;
+  --accent-hot:  #E8C488;
+  --accent-rgb:  201, 169, 110;
+
+  --border:        rgba(200, 180, 150, 0.10);
+  --border-strong: rgba(200, 180, 150, 0.20);
+
+  --feather-color: #E8C870;  /* bright warm gold — visible on dark leather */
+
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.40);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.50);
+  --shadow-xl: 0 24px 64px rgba(0, 0, 0, 0.60);
+}
+
+/* ═══════════════════════════════
+   FALLING FEATHERS
+═══════════════════════════════ */
+
+/* Feather A — gentle S-sway, barely rotates */
+@keyframes feather-a {
+  0%   { transform: translateY(-60px) translateX(0)    rotate(-8deg);  opacity: 0; }
+  7%   { opacity: var(--f-op, 0.4); }
+  25%  { transform: translateY(24vh)  translateX(28px)  rotate(4deg); }
+  50%  { transform: translateY(50vh)  translateX(-16px) rotate(-9deg); }
+  75%  { transform: translateY(75vh)  translateX(22px)  rotate(6deg); }
+  93%  { opacity: var(--f-op, 0.4); }
+  100% { transform: translateY(112vh) translateX(-8px)  rotate(-4deg);  opacity: 0; }
+}
+
+/* Feather B — slow full tumble, drifts steadily to one side */
+@keyframes feather-b {
+  0%   { transform: translateY(-60px) translateX(0)    rotate(0deg);    opacity: 0; }
+  7%   { opacity: var(--f-op, 0.4); }
+  33%  { transform: translateY(30vh)  translateX(-32px) rotate(-110deg); }
+  66%  { transform: translateY(65vh)  translateX(-18px) rotate(-235deg); }
+  93%  { opacity: var(--f-op, 0.4); }
+  100% { transform: translateY(112vh) translateX(-44px) rotate(-360deg); opacity: 0; }
+}
+
+/* Feather C — wide lazy float, zigzags horizontally */
+@keyframes feather-c {
+  0%   { transform: translateY(-60px) translateX(-18px) rotate(14deg);  opacity: 0; }
+  7%   { opacity: var(--f-op, 0.4); }
+  20%  { transform: translateY(20vh)  translateX(42px)  rotate(-4deg); }
+  40%  { transform: translateY(40vh)  translateX(-28px) rotate(11deg); }
+  60%  { transform: translateY(60vh)  translateX(36px)  rotate(-7deg); }
+  80%  { transform: translateY(80vh)  translateX(-14px) rotate(9deg); }
+  93%  { opacity: var(--f-op, 0.4); }
+  100% { transform: translateY(112vh) translateX(20px)  rotate(-3deg);  opacity: 0; }
+}
+
+/* Feather D — quick micro-wobbles, mostly vertical */
+@keyframes feather-d {
+  0%   { transform: translateY(-60px) translateX(0)    rotate(18deg);  opacity: 0; }
+  7%   { opacity: var(--f-op, 0.4); }
+  15%  { transform: translateY(14vh)  translateX(14px)  rotate(-12deg); }
+  30%  { transform: translateY(28vh)  translateX(28px)  rotate(22deg); }
+  45%  { transform: translateY(44vh)  translateX(8px)   rotate(-16deg); }
+  60%  { transform: translateY(60vh)  translateX(30px)  rotate(20deg); }
+  75%  { transform: translateY(75vh)  translateX(10px)  rotate(-10deg); }
+  93%  { opacity: var(--f-op, 0.4); }
+  100% { transform: translateY(112vh) translateX(22px)  rotate(14deg);  opacity: 0; }
+}
+
+/* ═══════════════════════════════
+   BASE RESET & TYPOGRAPHY
+═══════════════════════════════ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-garamond), 'EB Garamond', 'Times New Roman', serif;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.35s ease, color 0.35s ease;
+  overflow-x: hidden;
+}
+
+/* Paper grain texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='grain'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23grain)' opacity='1'/%3E%3C/svg%3E");
+  background-size: 250px 250px;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+.dark body::before {
+  opacity: 0.055;
+}
+
+/* ═══════════════════════════
+   HEADINGS
+═══════════════════════════ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-cinzel), 'Cinzel', Georgia, serif;
+  color: var(--text-primary);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+/* ═══════════════════════════
+   SCROLLBAR
+═══════════════════════════ */
+
+::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: var(--bg-surface); }
+::-webkit-scrollbar-thumb  { background: var(--accent-warm); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-hot); }
+
+/* ═══════════════════════════
+   SELECTION
+═══════════════════════════ */
+
+::selection {
+  background-color: rgba(var(--accent-rgb), 0.22);
+  color: var(--text-primary);
+}
+
+/* ═══════════════════════════
+   COMPONENT LAYER
+═══════════════════════════ */
+
+@layer components {
+
+  /* ── Ink Link ─────────────────────────── */
+  .ink-link {
+    @apply relative text-[var(--text-primary)] no-underline;
+    transition: color var(--duration) ease;
+  }
+  .ink-link::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.35s var(--ease-slow);
+  }
+  .ink-link:hover { color: var(--accent); }
+  .ink-link:hover::after { width: 100%; }
+
+  /* ── Reveal Animation ─────────────────── */
+  .reveal {
+    @apply opacity-0;
+    transform: translateY(24px);
+    transition: opacity 0.9s var(--ease-slow), transform 0.9s var(--ease-slow);
+  }
+  .reveal.in-view {
+    @apply opacity-100;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.15s; }
+  .reveal-delay-2 { transition-delay: 0.30s; }
+  .reveal-delay-3 { transition-delay: 0.45s; }
+  .reveal-delay-4 { transition-delay: 0.60s; }
+
+  /* ── Poetry Body ──────────────────────── */
+  .poem-body {
+    font-family: var(--font-cormorant), 'Cormorant Garamond', Georgia, serif;
+    font-size: clamp(1.125rem, 1.8vw, 1.375rem);
+    line-height: 2.2;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--text-secondary);
+    max-width: 52ch;
+    margin: 0 auto;
+  }
+  .poem-body p {
+    margin-bottom: 2.25rem;
+    white-space: pre-line;
+  }
+  .poem-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  /* Force-override inline colors injected by execCommand in dark mode */
+  .dark .poem-body,
+  .dark .poem-body * {
+    color: #C8B896 !important;
+  }
+
+  /* ── Section Label ────────────────────── */
+  .section-label {
+    font-family: var(--font-cinzel), Georgia, serif;
+    font-size: 0.625rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+  }
+
+  /* ── Parchment Card ───────────────────── */
+  .parchment-card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--duration) ease, transform var(--duration) var(--ease-slow);
+  }
+  .parchment-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  /* ── Gold Accent Line ─────────────────── */
+  .gold-line {
+    width: 48px;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  /* ── Nav Link ─────────────────────────── */
+  .nav-link {
+    font-family: var(--font-cinzel), Georgia, serif;
+    font-size: 0.6875rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: var(--accent);
+    transition: width 0.35s var(--ease-slow);
+  }
+  .nav-link:hover,
+  .nav-link.active {
+    color: var(--text-primary);
+  }
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════
+   REDUCED MOTION
+═══════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+}
+
+/* ═══════════════════════════
+   UTILITY OVERRIDES
+═══════════════════════════ */
+
+.text-primary   { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-muted     { color: var(--text-muted); }
+.text-faint     { color: var(--text-faint); }
+.text-accent    { color: var(--accent); }
+.bg-surface     { background-color: var(--bg-surface); }
+.bg-elevated    { background-color: var(--bg-elevated); }
+.border-themed  { border-color: var(--border); }
+.border-strong  { border-color: var(--border-strong); }
+
+/* ═══════════════════════════
+   GALLERY MASONRY
+═══════════════════════════ */
+
+.masonry-grid {
+  columns: 3 300px;
+  column-gap: 1.25rem;
+}
+.masonry-item {
+  break-inside: avoid;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .masonry-grid { columns: 2 200px; }
+}
+@media (max-width: 480px) {
+  .masonry-grid { columns: 1; }
+}

@@ -1,0 +1,121 @@
+'use client'
+
+import { motion, useInView } from 'framer-motion'
+import { useRef } from 'react'
+import Link from 'next/link'
+import type { Poem } from '@/lib/data/poems'
+import { usePoems } from '@/lib/hooks/usePoems'
+
+interface ReflectionsProps {
+  poems: Poem[]
+}
+
+export default function Reflections({ poems: initial }: ReflectionsProps) {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { once: true, margin: '-60px' })
+
+  const { activePoems } = usePoems(initial)
+  const shown = activePoems.slice(0, 3)
+
+  return (
+    <section ref={ref} className="py-24 px-6" aria-label="Reflexões recentes">
+      <div className="max-w-site mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-14"
+        >
+          <p className="section-label mb-4">Aesthesis</p>
+          <h2
+            className="font-cinzel text-[var(--text-primary)]"
+            style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.875rem)' }}
+          >
+            Poemas Recentes
+          </h2>
+          <p className="font-cormorant italic text-[var(--text-muted)] mt-3 text-lg">
+            Fragmentos de percepção e linguagem.
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {shown.map((poem, i) => (
+            <motion.div
+              key={poem.id}
+              initial={{ opacity: 0, y: 28 }}
+              animate={inView ? { opacity: 1, y: 0 } : {}}
+              transition={{ duration: 0.8, delay: i * 0.12, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] }}
+            >
+              <PoemTile poem={poem} />
+            </motion.div>
+          ))}
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={inView ? { opacity: 1 } : {}}
+          transition={{ duration: 0.7, delay: 0.5 }}
+          className="text-center mt-12"
+        >
+          <Link
+            href="/aesthesis"
+            className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 flex items-center justify-center gap-2 group"
+          >
+            Ver todos os poemas
+            <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
+          </Link>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+function PoemTile({ poem }: { poem: Poem }) {
+  const displayTitle = poem.title.trim() || poem.author
+
+  return (
+    <Link
+      href="/aesthesis"
+      className="block parchment-card p-8 group h-full"
+      aria-label={`Ver poema: ${displayTitle}`}
+    >
+      <div className="flex flex-col h-full gap-6">
+        {/* Image thumbnail */}
+        {poem.imageSrc && (
+          <div className="w-full h-32 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={poem.imageSrc}
+              alt=""
+              aria-hidden="true"
+              className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-500"
+            />
+          </div>
+        )}
+
+        {/* Title */}
+        <h3
+          className="font-cinzel text-[var(--text-primary)] group-hover:text-[var(--accent)] transition-colors duration-300"
+          style={{ fontSize: 'clamp(0.9rem, 1.5vw, 1.125rem)' }}
+        >
+          {displayTitle}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="font-cormorant italic text-[var(--text-muted)] text-base leading-relaxed flex-1">
+          "{poem.excerpt}"
+        </p>
+
+        {/* Footer */}
+        <div className="pt-4 border-t border-[var(--border)] flex items-center justify-between">
+          <cite className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-[var(--text-faint)] not-italic">
+            {poem.author}
+          </cite>
+          <span className="font-cinzel text-[0.55rem] tracking-[0.1em] uppercase text-[var(--text-faint)]">
+            {poem.readingTime} min
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
