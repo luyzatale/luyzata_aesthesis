@@ -15,11 +15,16 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const poems = await req.json()
-  await put(PATHNAME, JSON.stringify(poems), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'application/json',
-  })
-  return NextResponse.json({ ok: true })
+  try {
+    const poems = await req.json()
+    await put(PATHNAME, JSON.stringify(poems), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json',
+    })
+    return NextResponse.json({ ok: true })
+  } catch (err) {
+    console.error('[/api/poems POST]', err)
+    return NextResponse.json({ error: String(err) }, { status: 500 })
+  }
 }

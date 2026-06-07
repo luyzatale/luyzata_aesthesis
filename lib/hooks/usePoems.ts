@@ -17,13 +17,13 @@ async function fetchUserPoems(): Promise<Poem[]> {
 }
 
 async function persistUserPoems(poems: Poem[]): Promise<void> {
-  // Strip runtime blob URLs before saving; Vercel Blob URLs are stored in imageSrc directly
   const clean = poems.map(({ ...p }) => p)
-  await fetch('/api/poems', {
+  const res = await fetch('/api/poems', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(clean),
   })
+  if (!res.ok) throw new Error(`Failed to save poems (${res.status})`)
 }
 
 export function usePoems(initial: Poem[]) {
@@ -84,7 +84,8 @@ export function usePoems(initial: Poem[]) {
       const form = new FormData()
       form.append('file', imageFile)
       form.append('id', id)
-      const res     = await fetch('/api/photos/upload', { method: 'POST', body: form })
+      const res = await fetch('/api/photos/upload', { method: 'POST', body: form })
+      if (!res.ok) throw new Error(`Image upload failed (${res.status})`)
       const { url } = await res.json()
       finalPoem = { ...poem, imageSrc: url, imageKey: url }
     }
