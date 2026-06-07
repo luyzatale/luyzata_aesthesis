@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-const SECRET = 'Sun*1010*'
+const SECRET = 'Sun*1010'
 
 interface PasswordModalProps {
   onSuccess: () => void
