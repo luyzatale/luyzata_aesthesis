@@ -24,8 +24,10 @@ export interface DisplayPhoto {
   isUser?: boolean
 }
 
+const BLOB_BASE = 'https://xnt8obwd4nufxpsw.public.blob.vercel-storage.com'
+
 function staticToDisplay(p: Photo): DisplayPhoto {
-  return { id: p.id, src: `/assets/fotos/${p.filename}`, alt: p.alt, date: p.date, width: p.width, height: p.height }
+  return { id: p.id, src: `${BLOB_BASE}/photos/${p.filename}`, alt: p.alt, date: p.date, width: p.width, height: p.height }
 }
 
 export function usePhotos(staticPhotos: Photo[]) {
