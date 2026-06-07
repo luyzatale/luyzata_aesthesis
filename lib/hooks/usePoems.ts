@@ -1,22 +1,29 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { saveBlob, getBlob } from '@/lib/db'
 import type { Poem } from '@/lib/data/poems'
 
 const HIDDEN_KEY = 'aesthesis-hidden-poems'
 const EDITS_KEY  = 'aesthesis-poem-edits'
-const NEW_KEY    = 'aesthesis-new-poems'
 
-async function resolveImageSrc(poem: Poem): Promise<Poem> {
-  if (!poem.imageKey) return poem
+async function fetchUserPoems(): Promise<Poem[]> {
   try {
-    const blob = await getBlob(poem.imageKey)
-    if (!blob) return poem
-    return { ...poem, imageSrc: URL.createObjectURL(blob) }
+    const res = await fetch('/api/poems', { cache: 'no-store' })
+    if (!res.ok) return []
+    return res.json()
   } catch {
-    return poem
+    return []
   }
+}
+
+async function persistUserPoems(poems: Poem[]): Promise<void> {
+  // Strip runtime blob URLs before saving; Vercel Blob URLs are stored in imageSrc directly
+  const clean = poems.map(({ ...p }) => p)
+  await fetch('/api/poems', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify(clean),
+  })
 }
 
 export function usePoems(initial: Poem[]) {
@@ -30,14 +37,10 @@ export function usePoems(initial: Poem[]) {
       try {
         const h = localStorage.getItem(HIDDEN_KEY)
         const e = localStorage.getItem(EDITS_KEY)
-        const n = localStorage.getItem(NEW_KEY)
         if (h) setHidden(JSON.parse(h))
         if (e) setEdits(JSON.parse(e))
-        if (n) {
-          const raw: Poem[] = JSON.parse(n)
-          const resolved = await Promise.all(raw.map(resolveImageSrc))
-          setUserPoems(resolved)
-        }
+        const poems = await fetchUserPoems()
+        setUserPoems(poems)
       } catch {}
       setMounted(true)
     }
@@ -51,10 +54,7 @@ export function usePoems(initial: Poem[]) {
     : initial
 
   const activePoems: Poem[] = mounted
-    ? [
-        ...userPoems.filter((p) => !hidden.includes(p.slug)),
-        ...basePoems,
-      ]
+    ? [...userPoems.filter((p) => !hidden.includes(p.slug)), ...basePoems]
     : initial
 
   const hidePoem = (slug: string) => {
@@ -66,13 +66,9 @@ export function usePoems(initial: Poem[]) {
   const saveEdit = (slug: string, changes: Partial<Poem>) => {
     const isUserPoem = userPoems.some((p) => p.slug === slug)
     if (isUserPoem) {
-      const next = userPoems.map((p) =>
-        p.slug === slug ? { ...p, ...changes } : p
-      )
+      const next = userPoems.map((p) => p.slug === slug ? { ...p, ...changes } : p)
       setUserPoems(next)
-      // Persist without blob URLs
-      const forStorage = next.map(({ imageSrc: _, ...rest }) => rest)
-      localStorage.setItem(NEW_KEY, JSON.stringify(forStorage))
+      persistUserPoems(next)
       return
     }
     const next = { ...edits, [slug]: { ...(edits[slug] ?? {}), ...changes } }
@@ -84,18 +80,18 @@ export function usePoems(initial: Poem[]) {
     let finalPoem = poem
 
     if (imageFile) {
-      const key = `poem-img-${poem.id}`
-      await saveBlob(key, imageFile)
-      const blobUrl = URL.createObjectURL(imageFile)
-      finalPoem = { ...poem, imageKey: key, imageSrc: blobUrl }
+      const id   = `poem-img-${poem.id}`
+      const form = new FormData()
+      form.append('file', imageFile)
+      form.append('id', id)
+      const res     = await fetch('/api/photos/upload', { method: 'POST', body: form })
+      const { url } = await res.json()
+      finalPoem = { ...poem, imageSrc: url, imageKey: url }
     }
 
     const next = [finalPoem, ...userPoems]
     setUserPoems(next)
-
-    // Persist without blob URLs
-    const forStorage = next.map(({ imageSrc: _, ...rest }) => rest)
-    localStorage.setItem(NEW_KEY, JSON.stringify(forStorage))
+    await persistUserPoems(next)
   }
 
   const getEdited = (slug: string): Partial<Poem> => {
