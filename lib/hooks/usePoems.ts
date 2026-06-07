@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { upload } from '@vercel/blob/client'
 import type { Poem } from '@/lib/data/poems'
 
 const HIDDEN_KEY = 'aesthesis-hidden-poems'
@@ -80,13 +81,12 @@ export function usePoems(initial: Poem[]) {
     let finalPoem = poem
 
     if (imageFile) {
-      const id   = `poem-img-${poem.id}`
-      const form = new FormData()
-      form.append('file', imageFile)
-      form.append('id', id)
-      const res = await fetch('/api/photos/upload', { method: 'POST', body: form })
-      if (!res.ok) throw new Error(`Image upload failed (${res.status})`)
-      const { url } = await res.json()
+      const id  = `poem-img-${poem.id}`
+      const ext = imageFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+      const { url } = await upload(`photos/${id}.${ext}`, imageFile, {
+        access: 'public',
+        handleUploadUrl: '/api/photos/upload',
+      })
       finalPoem = { ...poem, imageSrc: url, imageKey: url }
     }
 

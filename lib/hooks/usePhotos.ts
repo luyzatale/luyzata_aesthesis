@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { upload } from '@vercel/blob/client'
 import type { Photo } from '@/lib/data/photos'
 
 const META_KEY = 'aesthesis-photos-v2'
@@ -51,13 +52,12 @@ export function usePhotos(staticPhotos: Photo[]) {
   ]
 
   const addPhoto = async (file: File) => {
-    const id   = `photo-${Date.now()}`
-    const form = new FormData()
-    form.append('file', file)
-    form.append('id', id)
-
-    const res     = await fetch('/api/photos/upload', { method: 'POST', body: form })
-    const { url } = await res.json()
+    const id  = `photo-${Date.now()}`
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+    const { url } = await upload(`photos/${id}.${ext}`, file, {
+      access: 'public',
+      handleUploadUrl: '/api/photos/upload',
+    })
 
     const meta: UserPhotoMeta = { id, url, date: new Date().toISOString().slice(0, 10) }
     const next = [meta, ...userMeta]

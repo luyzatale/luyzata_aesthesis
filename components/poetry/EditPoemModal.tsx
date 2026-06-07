@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { upload } from '@vercel/blob/client'
 import RichEditor from '@/components/poetry/RichEditor'
 import type { Poem } from '@/lib/data/poems'
 
@@ -70,12 +71,12 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
     }
 
     if (imageFile) {
-      const id   = `poem-img-${poem.id}`
-      const form = new FormData()
-      form.append('file', imageFile)
-      form.append('id', id)
-      const res     = await fetch('/api/photos/upload', { method: 'POST', body: form })
-      const { url } = await res.json()
+      const id  = `poem-img-${poem.id}`
+      const ext = imageFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+      const { url } = await upload(`photos/${id}.${ext}`, imageFile, {
+        access: 'public',
+        handleUploadUrl: '/api/photos/upload',
+      })
       changes.imageSrc = url
       changes.imageKey = url
     }
