@@ -1,31 +1,32 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import RichEditor from '@/components/poetry/RichEditor'
 import type { Poem } from '@/lib/data/poems'
 
 interface EditPoemModalProps {
-  poem: Poem
+  poem:       Poem
   overrides?: Partial<Poem>
-  onSave: (changes: Partial<Poem>) => void
-  onClose: () => void
+  onSave:     (changes: Partial<Poem>) => void
+  onClose:    () => void
 }
 
-export default function EditPoemModal({
-  poem,
-  overrides,
-  onSave,
-  onClose,
-}: EditPoemModalProps) {
-  const merged = { ...poem, ...overrides }
+export default function EditPoemModal({ poem, overrides, onSave, onClose }: EditPoemModalProps) {
+  const uid     = useId()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const merged  = { ...poem, ...overrides }
 
-  const [title,    setTitle]    = useState(merged.title)
-  const [author,   setAuthor]   = useState(merged.author)
-  const [excerpt,  setExcerpt]  = useState(merged.excerpt)
-  const [stanzas,  setStanzas]  = useState<string[]>(merged.body)
+  // Join stanzas into one body for the single editor
+  const [title,        setTitle]        = useState(merged.title)
+  const [author,       setAuthor]       = useState(merged.author)
+  const [body,         setBody]         = useState(merged.body.join('\n\n'))
+  const [lang,         setLang]         = useState<'pt' | 'en'>(merged.language ?? 'pt')
+  const [imageFile,    setImageFile]    = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(merged.imageSrc ?? null)
+  const [dragging,     setDragging]     = useState(false)
+  const [error,        setError]        = useState('')
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -36,20 +37,50 @@ export default function EditPoemModal({
     }
   }, [onClose])
 
-  const updateStanza = (i: number, value: string) => {
-    setStanzas((prev) => prev.map((s, idx) => (idx === i ? value : s)))
-  }
-  const addStanza    = () => setStanzas((prev) => [...prev, ''])
-  const removeStanza = (i: number) =>
-    setStanzas((prev) => prev.filter((_, idx) => idx !== i))
+  const handleImageFile = useCallback((f: File) => {
+    if (!f.type.startsWith('image/')) { setError('Selecione um ficheiro de imagem válido.'); return }
+    setImageFile(f)
+    setImagePreview(URL.createObjectURL(f))
+    setError('')
+  }, [])
 
-  const handleSave = () => {
-    onSave({
+  const onFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0]; if (f) handleImageFile(f)
+  }
+  const onDrop = (e: React.DragEvent) => {
+    e.preventDefault(); setDragging(false)
+    const f = e.dataTransfer.files?.[0]; if (f) handleImageFile(f)
+  }
+  const removeImage = () => {
+    setImageFile(null); setImagePreview(null)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  const handleSave = async () => {
+    const plainText = body.replace(/<[^>]+>/g, '').trim()
+    if (!plainText) { setError('Escreva pelo menos um verso.'); return }
+
+    const changes: Partial<Poem> = {
       title,
-      author,
-      excerpt,
-      body:     stanzas.filter((s) => s.trim() !== ''),
-    })
+      author:      author.trim() || 'Aesthesis',
+      body:        [body],
+      language:    lang,
+      readingTime: Math.max(1, Math.ceil(plainText.split(/\s+/).length / 160)),
+      excerpt:     plainText.replace(/\s+/g, ' ').slice(0, 120),
+    }
+
+    if (imageFile) {
+      const id   = `poem-img-${poem.id}`
+      const form = new FormData()
+      form.append('file', imageFile)
+      form.append('id', id)
+      const res     = await fetch('/api/photos/upload', { method: 'POST', body: form })
+      const { url } = await res.json()
+      changes.imageSrc = url
+      changes.imageKey = url
+    }
+
+    onSave(changes)
     onClose()
   }
 
@@ -65,121 +96,124 @@ export default function EditPoemModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-10 px-4"
-        style={{ background: 'rgba(10, 8, 6, 0.88)', backdropFilter: 'blur(10px)' }}
+        style={{ background: 'rgba(10,8,6,0.90)', backdropFilter: 'blur(12px)' }}
         onClick={onClose}
       >
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 12 }}
-          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] }}
+          transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] }}
           className="w-full max-w-2xl"
           style={{ background: 'var(--bg-surface)', border: '1px solid var(--border)' }}
           onClick={(e) => e.stopPropagation()}
           role="dialog"
           aria-modal="true"
-          aria-label={`Editar poema: ${poem.title}`}
+          aria-labelledby={`${uid}-title`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--border)]">
-            <p className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
+            <p id={`${uid}-title`} className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
               Editar Poema
             </p>
-            <button
-              onClick={onClose}
-              aria-label="Fechar"
-              className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors font-cinzel text-[0.6rem] tracking-[0.12em] uppercase focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
-            >
+            <button onClick={onClose} aria-label="Fechar"
+              className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors font-cinzel text-[0.6rem] tracking-[0.12em] uppercase focus-visible:outline-none">
               Fechar ✕
             </button>
           </div>
 
           {/* Form */}
           <div className="px-8 py-8 space-y-6">
-            {/* Title */}
-            <div>
-              <label className={labelClass}>Título</label>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className={inputClass}
-              />
-            </div>
 
-            {/* Author */}
-            <div>
-              <label className={labelClass}>Autor</label>
-              <input
-                type="text"
-                value={author}
-                onChange={(e) => setAuthor(e.target.value)}
-                className={inputClass}
-              />
-            </div>
-
-            {/* Excerpt */}
-            <div>
-              <label className={labelClass}>Excerto</label>
-              <textarea
-                value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                rows={2}
-                className={`${inputClass} resize-none`}
-              />
-            </div>
-
-            {/* Body stanzas */}
-            <div>
-              <label className={labelClass}>Estrofes</label>
-              <div className="space-y-4">
-                {stanzas.map((stanza, i) => (
-                  <div key={i} className="space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase text-[var(--text-faint)]">
-                        Estrofe {i + 1}
-                      </span>
-                      {stanzas.length > 1 && (
-                        <button
-                          onClick={() => removeStanza(i)}
-                          aria-label="Remover estrofe"
-                          className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase text-[var(--text-faint)] hover:text-red-500 transition-colors focus-visible:outline-none"
-                        >
-                          Remover
-                        </button>
-                      )}
-                    </div>
-                    <RichEditor
-                      value={stanza}
-                      onChange={(html) => updateStanza(i, html)}
-                      placeholder={`Estrofe ${i + 1}…`}
-                      minRows={3}
-                    />
-                  </div>
-                ))}
-                <button
-                  onClick={addStanza}
-                  className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-[var(--text-faint)] hover:text-[var(--accent)] transition-colors"
-                >
-                  + Adicionar estrofe
-                </button>
+            {/* Title + Author */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor={`${uid}-ttl`} className={labelClass}>Título</label>
+                <input id={`${uid}-ttl`} type="text" value={title}
+                  onChange={(e) => { setTitle(e.target.value); setError('') }}
+                  placeholder="Título do poema (opcional)" className={inputClass} autoFocus />
+              </div>
+              <div>
+                <label htmlFor={`${uid}-aut`} className={labelClass}>Autor</label>
+                <input id={`${uid}-aut`} type="text" value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="L. Serrano" className={inputClass} />
               </div>
             </div>
 
+            {/* Language */}
+            <div>
+              <p className={labelClass}>Língua</p>
+              <div className="flex gap-3">
+                {(['pt', 'en'] as const).map((l) => (
+                  <button key={l} type="button" onClick={() => setLang(l)}
+                    className={`font-cinzel text-[0.55rem] tracking-[0.12em] uppercase px-4 py-2 border transition-all duration-200 focus-visible:outline-none ${
+                      lang === l
+                        ? 'border-[var(--accent)] bg-[var(--accent)] text-[var(--bg)]'
+                        : 'border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] bg-transparent'
+                    }`}>
+                    {l === 'pt' ? 'Português' : 'English'}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Poem body */}
+            <div>
+              <p className={labelClass}>Poema *</p>
+              <RichEditor value={body} onChange={setBody} placeholder="Escreve o poema aqui…" minRows={10} />
+            </div>
+
+            {/* Image */}
+            <div>
+              <p className={labelClass}>
+                Imagem <span className="normal-case text-[var(--text-faint)]">(opcional)</span>
+              </p>
+              {imagePreview ? (
+                <div className="relative">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={imagePreview} alt="Pré-visualização"
+                    className="w-full max-h-56 object-cover border border-[var(--border)]" />
+                  <button type="button" onClick={removeImage}
+                    className="absolute top-2 right-2 bg-[var(--bg-overlay)] border border-[var(--border)] font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-[var(--text-muted)] hover:text-red-500 transition-colors">
+                    Remover
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+                  onDragLeave={() => setDragging(false)}
+                  onDrop={onDrop}
+                  onClick={() => fileRef.current?.click()}
+                  className={`cursor-pointer border border-dashed flex flex-col items-center justify-center gap-2 py-8 transition-all duration-300 ${
+                    dragging ? 'border-[var(--accent)]' : 'border-[var(--border)] hover:border-[var(--accent)] bg-[var(--bg)]'
+                  }`}
+                  role="button" tabIndex={0} aria-label="Selecionar ou arrastar imagem"
+                  onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
+                >
+                  <ImageIcon className="w-6 h-6 text-[var(--text-faint)]" />
+                  <p className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--text-faint)]">
+                    Clique ou arraste uma imagem
+                  </p>
+                  <p className="font-cormorant italic text-[var(--text-faint)] text-xs">JPG, PNG, AVIF, WEBP</p>
+                </div>
+              )}
+              <input ref={fileRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" aria-hidden="true" />
+            </div>
+
+            {error && (
+              <p className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-red-500">{error}</p>
+            )}
           </div>
 
           {/* Footer */}
           <div className="px-8 py-5 border-t border-[var(--border)] flex items-center justify-end gap-4">
-            <button
-              onClick={onClose}
-              className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
-            >
+            <button onClick={onClose}
+              className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none">
               Cancelar
             </button>
-            <button
-              onClick={handleSave}
-              className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
-            >
+            <button onClick={handleSave}
+              className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none">
               Guardar
             </button>
           </div>
@@ -189,13 +223,12 @@ export default function EditPoemModal({
   )
 }
 
-function TrashIcon({ className }: { className?: string }) {
+function ImageIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" className={className} aria-hidden="true">
-      <polyline points="3,6 5,6 21,6" />
-      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4h6v2" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" className={className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="2" />
+      <circle cx="8.5" cy="8.5" r="1.5" />
+      <polyline points="21 15 16 10 5 21" />
     </svg>
   )
 }
