@@ -20,6 +20,7 @@ export async function POST(req: Request) {
     await put(PATHNAME, JSON.stringify(poems), {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
       contentType: 'application/json',
     })
     return NextResponse.json({ ok: true })

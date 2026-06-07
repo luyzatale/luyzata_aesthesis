@@ -9,6 +9,7 @@ export async function POST(request: Request) {
       request,
       onBeforeGenerateToken: async () => ({
         allowedContentTypes: ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/avif'],
+        allowOverwrite: true,
       }),
       onUploadCompleted: async ({ blob }) => {
         console.log('[blob] upload completed', blob.url)
