@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import EditPoemModal from '@/components/poetry/EditPoemModal'
+import PasswordModal from '@/components/ui/PasswordModal'
 import type { Poem } from '@/lib/data/poems'
 
 interface PoemActionsProps {
@@ -11,21 +12,18 @@ interface PoemActionsProps {
   onSave: (slug: string, changes: Partial<Poem>) => void
 }
 
-export default function PoemActions({
-  poem,
-  overrides,
-  onHide,
-  onSave,
-}: PoemActionsProps) {
-  const [editing,    setEditing]    = useState(false)
-  const [confirming, setConfirming] = useState(false)
+export default function PoemActions({ poem, overrides, onHide, onSave }: PoemActionsProps) {
+  const [gatingEdit,   setGatingEdit]   = useState(false)
+  const [gatingDelete, setGatingDelete] = useState(false)
+  const [editing,      setEditing]      = useState(false)
+  const [confirming,   setConfirming]   = useState(false)
 
   return (
     <>
       <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
         {/* Edit */}
         <button
-          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setEditing(true) }}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGatingEdit(true) }}
           aria-label={`Editar: ${poem.title}`}
           title="Editar poema"
           className="p-1.5 text-[var(--text-faint)] hover:text-[var(--accent)] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
@@ -33,27 +31,25 @@ export default function PoemActions({
           <PencilIcon className="w-3.5 h-3.5" />
         </button>
 
-        {/* Remove — two-click confirm */}
+        {/* Delete */}
         {confirming ? (
           <span className="flex items-center gap-1">
             <button
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onHide(poem.slug) }}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); onHide(poem.slug); setConfirming(false) }}
               className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-red-500 border border-red-500/40 hover:bg-red-500/10 transition-colors focus-visible:outline-none"
-              aria-label="Confirmar remoção"
             >
               Confirmar
             </button>
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirming(false) }}
               className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
-              aria-label="Cancelar remoção"
             >
               Cancelar
             </button>
           </span>
         ) : (
           <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirming(true) }}
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGatingDelete(true) }}
             aria-label={`Remover: ${poem.title}`}
             title="Remover poema"
             className="p-1.5 text-[var(--text-faint)] hover:text-red-500 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-400 rounded"
@@ -62,6 +58,20 @@ export default function PoemActions({
           </button>
         )}
       </div>
+
+      {gatingEdit && (
+        <PasswordModal
+          onSuccess={() => { setGatingEdit(false); setEditing(true) }}
+          onClose={() => setGatingEdit(false)}
+        />
+      )}
+
+      {gatingDelete && (
+        <PasswordModal
+          onSuccess={() => { setGatingDelete(false); setConfirming(true) }}
+          onClose={() => setGatingDelete(false)}
+        />
+      )}
 
       {editing && (
         <EditPoemModal

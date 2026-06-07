@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react'
 import { upload } from '@vercel/blob/client'
 import type { Photo } from '@/lib/data/photos'
 
-const META_KEY = 'aesthesis-photos-v2'
+const META_KEY   = 'aesthesis-photos-v2'
+const HIDDEN_KEY = 'aesthesis-photos-hidden'
 
 interface UserPhotoMeta {
   id:      string
   url:     string
   date:    string
+  alt?:    string
   width?:  number
   height?: number
 }
@@ -31,26 +33,31 @@ function staticToDisplay(p: Photo): DisplayPhoto {
 }
 
 export function usePhotos(staticPhotos: Photo[]) {
-  const [userMeta, setUserMeta] = useState<UserPhotoMeta[]>([])
+  const [userMeta,  setUserMeta]  = useState<UserPhotoMeta[]>([])
+  const [hiddenIds, setHiddenIds] = useState<string[]>([])
 
   useEffect(() => {
     const stored = localStorage.getItem(META_KEY)
-    if (stored) {
-      try { setUserMeta(JSON.parse(stored)) } catch {}
-    }
+    if (stored) { try { setUserMeta(JSON.parse(stored)) } catch {} }
+    const hidden = localStorage.getItem(HIDDEN_KEY)
+    if (hidden) { try { setHiddenIds(JSON.parse(hidden)) } catch {} }
   }, [])
 
   const allPhotos: DisplayPhoto[] = [
-    ...userMeta.map((m) => ({
-      id:     m.id,
-      src:    m.url,
-      alt:    '',
-      date:   m.date,
-      width:  m.width,
-      height: m.height,
-      isUser: true,
-    })),
-    ...staticPhotos.map(staticToDisplay),
+    ...userMeta
+      .filter((m) => !hiddenIds.includes(m.id))
+      .map((m) => ({
+        id:     m.id,
+        src:    m.url,
+        alt:    m.alt ?? '',
+        date:   m.date,
+        width:  m.width,
+        height: m.height,
+        isUser: true,
+      })),
+    ...staticPhotos
+      .filter((p) => !hiddenIds.includes(p.id))
+      .map(staticToDisplay),
   ]
 
   const addPhoto = async (file: File) => {
@@ -60,7 +67,6 @@ export function usePhotos(staticPhotos: Photo[]) {
       access: 'public',
       handleUploadUrl: '/api/photos/upload',
     })
-
     const meta: UserPhotoMeta = { id, url, date: new Date().toISOString().slice(0, 10) }
     const next = [meta, ...userMeta]
     setUserMeta(next)
@@ -69,16 +75,31 @@ export function usePhotos(staticPhotos: Photo[]) {
 
   const removePhoto = async (id: string) => {
     const photo = userMeta.find((m) => m.id === id)
-    if (!photo) return
-    await fetch('/api/photos/delete', {
-      method:  'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body:    JSON.stringify({ url: photo.url }),
-    })
-    const next = userMeta.filter((m) => m.id !== id)
+    if (photo) {
+      await fetch('/api/photos/delete', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ url: photo.url }),
+      })
+      const next = userMeta.filter((m) => m.id !== id)
+      setUserMeta(next)
+      localStorage.setItem(META_KEY, JSON.stringify(next))
+    } else {
+      hidePhoto(id)
+    }
+  }
+
+  const hidePhoto = (id: string) => {
+    const next = [...hiddenIds, id]
+    setHiddenIds(next)
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(next))
+  }
+
+  const updatePhotoAlt = (id: string, alt: string) => {
+    const next = userMeta.map((m) => m.id === id ? { ...m, alt } : m)
     setUserMeta(next)
     localStorage.setItem(META_KEY, JSON.stringify(next))
   }
 
-  return { allPhotos, addPhoto, removePhoto }
+  return { allPhotos, addPhoto, removePhoto, hidePhoto, updatePhotoAlt }
 }

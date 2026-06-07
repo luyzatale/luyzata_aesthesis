@@ -14,7 +14,13 @@ interface PhotoGalleryProps {
 export default function PhotoGallery({ photos: staticPhotos }: PhotoGalleryProps) {
   const [gating, setGating] = useState(false)
   const [adding, setAdding] = useState(false)
-  const { allPhotos, addPhoto } = usePhotos(staticPhotos)
+  const { allPhotos, addPhoto, removePhoto, hidePhoto, updatePhotoAlt } = usePhotos(staticPhotos)
+
+  const handleDelete = (id: string) => {
+    const isUser = allPhotos.find((p) => p.id === id)?.isUser
+    if (isUser) removePhoto(id)
+    else hidePhoto(id)
+  }
 
   return (
     <>
@@ -29,7 +35,11 @@ export default function PhotoGallery({ photos: staticPhotos }: PhotoGalleryProps
         </button>
       </div>
 
-      <MasonryGallery photos={allPhotos} />
+      <MasonryGallery
+        photos={allPhotos}
+        onDelete={handleDelete}
+        onEditAlt={updatePhotoAlt}
+      />
 
       {gating && (
         <PasswordModal
