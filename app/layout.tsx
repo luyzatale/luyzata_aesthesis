@@ -44,6 +44,12 @@ export const metadata: Metadata = {
     'Um espaço literário onde poesia, fotografia e reflexão se encontram. Palavras e imagens por Luyza T.A.',
   keywords: ['poesia', 'fotografia', 'reflexão', 'literatura', 'aesthesis', 'aisthesis'],
   authors: [{ name: 'Luyza T.A.' }],
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    title: 'Aesthesis',
+    statusBarStyle: 'black-translucent',
+  },
   openGraph: {
     title: 'Aesthesis — Poesia & Fotografia',
     description:
