@@ -23,7 +23,9 @@ export async function GET() {
   try {
     const { blobs } = await list({ prefix: PATHNAME })
     if (!blobs.length) return NextResponse.json(EMPTY)
-    const res = await fetch(blobs[0].url, { cache: 'no-store' })
+    // Append timestamp to bypass Vercel CDN cache for this public blob
+    const url = `${blobs[0].url}?t=${Date.now()}`
+    const res = await fetch(url, { cache: 'no-store' })
     return NextResponse.json(parse(await res.json()))
   } catch {
     return NextResponse.json(EMPTY)
