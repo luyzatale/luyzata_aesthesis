@@ -25,7 +25,7 @@ export default function RichEditor({
   className = '',
 }: RichEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
-  const lastValueRef = useRef(value)
+  const lastValueRef = useRef('')
 
   // Sync external value changes (initial load only — avoid cursor jump on typing)
   useEffect(() => {

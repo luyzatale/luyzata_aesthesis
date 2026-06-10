@@ -21,7 +21,11 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
   // Join stanzas into one body for the single editor
   const [title,        setTitle]        = useState(merged.title)
   const [author,       setAuthor]       = useState(merged.author)
-  const [body,         setBody]         = useState(merged.body.join('\n\n'))
+  const [body,         setBody]         = useState(() => {
+    const raw = merged.body.join('\n\n')
+    // If it's already HTML (contains tags), use as-is; otherwise convert newlines to <br>
+    return /<[^>]+>/.test(raw) ? raw : raw.replace(/\n/g, '<br>')
+  })
   const [lang,         setLang]         = useState<'pt' | 'en'>(merged.language ?? 'pt')
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(merged.imageSrc ?? null)
