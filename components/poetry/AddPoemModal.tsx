@@ -108,7 +108,6 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto py-10 px-4"
         style={{ background: 'rgba(10,8,6,0.90)', backdropFilter: 'blur(12px)' }}
-        onClick={onClose}
       >
         <motion.div
           initial={{ opacity: 0, y: 28 }}
