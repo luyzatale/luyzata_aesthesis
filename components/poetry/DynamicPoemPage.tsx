@@ -113,7 +113,7 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
           </div>
         )}
 
-        <article className="poem-body text-center">
+        <article className="poem-body text-left">
           {poem.body.map((stanza, i) =>
             /<[^>]+>/.test(stanza) ? (
               <p key={i} dangerouslySetInnerHTML={{ __html: stanza }} />
