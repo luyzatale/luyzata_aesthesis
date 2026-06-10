@@ -4,25 +4,29 @@ import { useState, useEffect } from 'react'
 import { upload } from '@vercel/blob/client'
 import type { Poem } from '@/lib/data/poems'
 
-const HIDDEN_KEY = 'aesthesis-hidden-poems'
-const EDITS_KEY  = 'aesthesis-poem-edits'
+interface PoemState {
+  poems:  Poem[]
+  hidden: string[]
+  edits:  Record<string, Partial<Poem>>
+}
 
-async function fetchUserPoems(): Promise<Poem[]> {
+const EMPTY: PoemState = { poems: [], hidden: [], edits: {} }
+
+async function fetchState(): Promise<PoemState> {
   try {
     const res = await fetch('/api/poems', { cache: 'no-store' })
-    if (!res.ok) return []
+    if (!res.ok) return EMPTY
     return res.json()
   } catch {
-    return []
+    return EMPTY
   }
 }
 
-async function persistUserPoems(poems: Poem[]): Promise<void> {
-  const clean = poems.map(({ ...p }) => p)
+async function persistState(state: PoemState): Promise<void> {
   const res = await fetch('/api/poems', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body:    JSON.stringify(clean),
+    body:    JSON.stringify(state),
   })
   if (!res.ok) {
     let detail = ''
@@ -40,12 +44,10 @@ export function usePoems(initial: Poem[]) {
   useEffect(() => {
     async function load() {
       try {
-        const h = localStorage.getItem(HIDDEN_KEY)
-        const e = localStorage.getItem(EDITS_KEY)
-        if (h) setHidden(JSON.parse(h))
-        if (e) setEdits(JSON.parse(e))
-        const poems = await fetchUserPoems()
-        setUserPoems(poems)
+        const state = await fetchState()
+        setUserPoems(state.poems)
+        setHidden(state.hidden)
+        setEdits(state.edits)
       } catch {}
       setMounted(true)
     }
@@ -65,7 +67,7 @@ export function usePoems(initial: Poem[]) {
   const hidePoem = (slug: string) => {
     const next = [...hidden, slug]
     setHidden(next)
-    localStorage.setItem(HIDDEN_KEY, JSON.stringify(next))
+    persistState({ poems: userPoems, hidden: next, edits })
   }
 
   const saveEdit = (slug: string, changes: Partial<Poem>) => {
@@ -73,12 +75,12 @@ export function usePoems(initial: Poem[]) {
     if (isUserPoem) {
       const next = userPoems.map((p) => p.slug === slug ? { ...p, ...changes } : p)
       setUserPoems(next)
-      persistUserPoems(next)
+      persistState({ poems: next, hidden, edits })
       return
     }
     const next = { ...edits, [slug]: { ...(edits[slug] ?? {}), ...changes } }
     setEdits(next)
-    localStorage.setItem(EDITS_KEY, JSON.stringify(next))
+    persistState({ poems: userPoems, hidden, edits: next })
   }
 
   const addPoem = async (poem: Poem, imageFile?: File) => {
@@ -96,7 +98,7 @@ export function usePoems(initial: Poem[]) {
 
     const next = [finalPoem, ...userPoems]
     setUserPoems(next)
-    await persistUserPoems(next)
+    await persistState({ poems: next, hidden, edits })
   }
 
   const getEdited = (slug: string): Partial<Poem> => {
