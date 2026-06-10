@@ -16,7 +16,7 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
   const [gatingPoem,   setGatingPoem]   = useState(false)
   const [addingPoem,   setAddingPoem]   = useState(false)
 
-  const { activePoems, hidePoem, saveEdit, addPoem, getEdited } = usePoems(initial)
+  const { activePoems, hidePoem, saveEdit, addPoem, getEdited, loaded } = usePoems(initial)
 
   const filtered = useMemo(() => {
     if (!query.trim()) return activePoems
@@ -57,12 +57,18 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
       </div>
 
       <p className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)] mb-10">
-        {filtered.length === activePoems.length
-          ? `${activePoems.length} poemas`
-          : `${filtered.length} de ${activePoems.length} poemas`}
+        {!loaded
+          ? 'A carregar…'
+          : filtered.length === activePoems.length
+            ? `${activePoems.length} poemas`
+            : `${filtered.length} de ${activePoems.length} poemas`}
       </p>
 
-      {filtered.length > 0 ? (
+      {!loaded ? (
+        <div className="py-20 text-center">
+          <p className="font-cormorant italic text-[var(--text-faint)] text-lg">A carregar…</p>
+        </div>
+      ) : filtered.length > 0 ? (
         <div className="space-y-10">
           {filtered.map((poem) => (
             <PoemInline
@@ -79,12 +85,14 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
           <p className="font-cormorant italic text-[var(--text-muted)] text-lg">
             Nenhum poema encontrado.
           </p>
-          <button
-            onClick={() => setQuery('')}
-            className="mt-4 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] hover:underline"
-          >
-            Limpar filtros
-          </button>
+          {query && (
+            <button
+              onClick={() => setQuery('')}
+              className="mt-4 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] hover:underline"
+            >
+              Limpar filtros
+            </button>
+          )}
         </div>
       )}
 

@@ -14,8 +14,8 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
 
-  const { activePoems, hidePoem } = usePoems(initial)
-  const shown = activePoems.slice(0, 3)
+  const { activePoems, hidePoem, loaded } = usePoems(initial)
+  const shown = loaded ? activePoems.slice(0, 3) : []
 
   return (
     <section ref={ref} className="py-24 px-6" aria-label="Reflexões recentes">

@@ -15,16 +15,16 @@ interface DynamicPoemPageProps {
 }
 
 export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
-  const { getUserPoem, mounted } = usePoems([])
+  const { getUserPoem, loaded } = usePoems([])
   const [poem, setPoem] = useState<Poem | null>(null)
   const [ready, setReady] = useState(false)
 
   useEffect(() => {
-    if (!mounted) return
+    if (!loaded) return
     const found = getUserPoem(slug)
     setPoem(found ?? null)
     setReady(true)
-  }, [mounted, slug, getUserPoem])
+  }, [loaded, slug, getUserPoem])
 
   if (!ready) {
     return (

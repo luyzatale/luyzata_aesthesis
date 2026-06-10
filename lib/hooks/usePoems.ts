@@ -39,48 +39,45 @@ export function usePoems(initial: Poem[]) {
   const [hidden,    setHidden]    = useState<string[]>([])
   const [edits,     setEdits]     = useState<Record<string, Partial<Poem>>>({})
   const [userPoems, setUserPoems] = useState<Poem[]>([])
-  const [mounted,   setMounted]   = useState(false)
+  const [loaded,    setLoaded]    = useState(false)
 
   useEffect(() => {
-    async function load() {
-      try {
-        const state = await fetchState()
-        setUserPoems(state.poems)
-        setHidden(state.hidden)
-        setEdits(state.edits)
-      } catch {}
-      setMounted(true)
-    }
-    load()
+    fetchState().then((state) => {
+      setUserPoems(state.poems)
+      setHidden(state.hidden)
+      setEdits(state.edits)
+      setLoaded(true)
+    }).catch(() => setLoaded(true))
   }, [])
 
-  const basePoems: Poem[] = mounted
+  const basePoems = loaded
     ? initial
         .filter((p) => !hidden.includes(p.slug))
         .map((p) => (edits[p.slug] ? { ...p, ...edits[p.slug] } : p))
-    : initial
+    : []
 
-  const activePoems: Poem[] = mounted
+  // Never return initial before server state loads — prevents flash of hidden poems
+  const activePoems: Poem[] = loaded
     ? [...userPoems.filter((p) => !hidden.includes(p.slug)), ...basePoems]
-    : initial
+    : []
 
-  const hidePoem = (slug: string) => {
+  const hidePoem = async (slug: string) => {
     const next = [...hidden, slug]
     setHidden(next)
-    persistState({ poems: userPoems, hidden: next, edits })
+    await persistState({ poems: userPoems, hidden: next, edits })
   }
 
-  const saveEdit = (slug: string, changes: Partial<Poem>) => {
+  const saveEdit = async (slug: string, changes: Partial<Poem>) => {
     const isUserPoem = userPoems.some((p) => p.slug === slug)
     if (isUserPoem) {
       const next = userPoems.map((p) => p.slug === slug ? { ...p, ...changes } : p)
       setUserPoems(next)
-      persistState({ poems: next, hidden, edits })
+      await persistState({ poems: next, hidden, edits })
       return
     }
     const next = { ...edits, [slug]: { ...(edits[slug] ?? {}), ...changes } }
     setEdits(next)
-    persistState({ poems: userPoems, hidden, edits: next })
+    await persistState({ poems: userPoems, hidden, edits: next })
   }
 
   const addPoem = async (poem: Poem, imageFile?: File) => {
@@ -110,5 +107,5 @@ export function usePoems(initial: Poem[]) {
   const getUserPoem = (slug: string): Poem | undefined =>
     userPoems.find((p) => p.slug === slug)
 
-  return { activePoems, hidePoem, saveEdit, addPoem, getEdited, getUserPoem, mounted }
+  return { activePoems, hidePoem, saveEdit, addPoem, getEdited, getUserPoem, loaded }
 }
