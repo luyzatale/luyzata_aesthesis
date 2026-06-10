@@ -102,7 +102,7 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
 
         {/* Attached image */}
         {poem.imageSrc && (
-          <div className="mb-12 flex justify-center">
+          <div className="mb-12 flex justify-start">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={poem.imageSrc}
