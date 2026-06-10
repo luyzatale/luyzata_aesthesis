@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { upload } from '@vercel/blob/client'
 import type { Poem } from '@/lib/data/poems'
 
 interface PoemState {
@@ -84,12 +83,15 @@ export function usePoems(initial: Poem[]) {
     let finalPoem = poem
 
     if (imageFile) {
-      const id  = `poem-img-${poem.id}`
-      const ext = imageFile.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-      const { url } = await upload(`photos/${id}.${ext}`, imageFile, {
-        access: 'public',
-        handleUploadUrl: '/api/photos/upload',
-      })
+      const form = new FormData()
+      form.append('file', imageFile)
+      const res = await fetch('/api/poems/image', { method: 'POST', body: form })
+      if (!res.ok) {
+        let detail = ''
+        try { const j = await res.json(); detail = j.error ?? '' } catch {}
+        throw new Error(`Erro ao enviar imagem (${res.status}${detail ? ': ' + detail : ''})`)
+      }
+      const { url } = await res.json()
       finalPoem = { ...poem, imageSrc: url, imageKey: url }
     }
 
