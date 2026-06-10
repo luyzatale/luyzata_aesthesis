@@ -23,6 +23,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
 
       {/* Header */}
       <div className="py-14 px-6 border-b border-[var(--border)]">
+        <div className="max-w-prose mx-auto">
         <ScrollBanner size="lg" className="inline-flex mb-8">
           {bannerText}
         </ScrollBanner>
@@ -40,10 +41,12 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
             {poem.readingTime} min de leitura
           </span>
         </div>
+        </div>
       </div>
 
       {/* Body */}
       <div className="px-6 py-12">
+        <div className="max-w-prose mx-auto">
 
         {/* Actions */}
         <div className="flex justify-end mb-6">
@@ -90,6 +93,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
         <div className="text-center">
           <p className="section-label mb-4">Partilhar</p>
           <ShareButtons title={bannerText} slug={poem.slug} />
+        </div>
         </div>
       </div>
     </div>
