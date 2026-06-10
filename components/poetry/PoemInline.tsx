@@ -22,12 +22,12 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
     <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
 
       {/* Header */}
-      <div className="py-14 px-6 text-center border-b border-[var(--border)]">
+      <div className="py-14 px-6 border-b border-[var(--border)]">
         <ScrollBanner size="lg" className="inline-flex mb-8">
           {bannerText}
         </ScrollBanner>
 
-        <div className="flex items-center justify-center gap-6 flex-wrap">
+        <div className="flex items-center justify-start gap-6 flex-wrap">
           <cite className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--text-muted)] not-italic">
             {poem.author}
           </cite>
@@ -43,7 +43,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
       </div>
 
       {/* Body */}
-      <div className="max-w-prose mx-auto px-6 py-12">
+      <div className="px-6 py-12">
 
         {/* Actions */}
         <div className="flex justify-end mb-6">
