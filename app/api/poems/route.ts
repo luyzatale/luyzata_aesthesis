@@ -21,7 +21,8 @@ function parse(data: unknown) {
 
 export async function GET() {
   try {
-    const { blobs } = await list({ prefix: PATHNAME })
+    const token = process.env.BLOB_READ_WRITE_TOKEN
+    const { blobs } = await list({ prefix: PATHNAME, token })
     if (!blobs.length) return NextResponse.json(EMPTY)
     // Append timestamp to bypass Vercel CDN cache for this public blob
     const url = `${blobs[0].url}?t=${Date.now()}`
@@ -35,11 +36,13 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const state = await req.json()
+    const token = process.env.BLOB_READ_WRITE_TOKEN
     await put(PATHNAME, JSON.stringify(state), {
       access: 'public',
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: 'application/json',
+      token,
     })
     return NextResponse.json({ ok: true })
   } catch (err) {
