@@ -24,7 +24,11 @@ async function persistUserPoems(poems: Poem[]): Promise<void> {
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(clean),
   })
-  if (!res.ok) throw new Error(`Failed to save poems (${res.status})`)
+  if (!res.ok) {
+    let detail = ''
+    try { const j = await res.json(); detail = j.error ?? '' } catch {}
+    throw new Error(`Erro ao guardar (${res.status}${detail ? ': ' + detail : ''})`)
+  }
 }
 
 export function usePoems(initial: Poem[]) {

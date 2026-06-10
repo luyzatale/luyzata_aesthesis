@@ -89,8 +89,8 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
 
       await onAdd(poem, imageFile ?? undefined)
       onClose()
-    } catch {
-      setError('Erro ao guardar. Tente novamente.')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Erro ao guardar. Tente novamente.')
       setSaving(false)
     }
   }
