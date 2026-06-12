@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
-import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import PasswordModal from '@/components/ui/PasswordModal'
 import type { DisplayPhoto } from '@/lib/hooks/usePhotos'
@@ -132,7 +131,6 @@ export default function MasonryGallery({ photos, onDelete, onEditAlt }: MasonryG
 
 function PhotoImg({
   photo,
-  sizes,
   priority = false,
   className = '',
 }: {
@@ -141,28 +139,14 @@ function PhotoImg({
   priority?: boolean
   className?: string
 }) {
-  if (photo.isUser) {
-    return (
-      // eslint-disable-next-line @next/next/no-img-element
-      <img
-        src={photo.src}
-        alt={photo.alt}
-        className={`w-full h-auto object-cover transition-all duration-700 grayscale-[15%] group-hover:grayscale-0 group-hover:scale-[1.03] ${className}`}
-        style={{ filter: 'contrast(1.04) brightness(0.97)' }}
-        loading={priority ? 'eager' : 'lazy'}
-      />
-    )
-  }
+  // eslint-disable-next-line @next/next/no-img-element
   return (
-    <Image
+    <img
       src={photo.src}
       alt={photo.alt}
-      width={photo.width}
-      height={photo.height}
-      sizes={sizes}
-      priority={priority}
       className={`w-full h-auto object-cover transition-all duration-700 grayscale-[15%] group-hover:grayscale-0 group-hover:scale-[1.03] ${className}`}
       style={{ filter: 'contrast(1.04) brightness(0.97)' }}
+      loading={priority ? 'eager' : 'lazy'}
     />
   )
 }
