@@ -245,7 +245,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
                     Clique ou arraste uma imagem
                   </p>
                   <p className="font-cormorant italic text-[var(--text-faint)] text-xs">
-                    JPG, PNG, AVIF, WEBP
+                    JPG, PNG, AVIF, WEBP, GIF
                   </p>
                 </div>
               )}

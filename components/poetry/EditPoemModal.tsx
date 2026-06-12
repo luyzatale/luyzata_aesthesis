@@ -201,7 +201,7 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
                   <p className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--text-faint)]">
                     Clique ou arraste uma imagem
                   </p>
-                  <p className="font-cormorant italic text-[var(--text-faint)] text-xs">JPG, PNG, AVIF, WEBP</p>
+                  <p className="font-cormorant italic text-[var(--text-faint)] text-xs">JPG, PNG, AVIF, WEBP, GIF</p>
                 </div>
               )}
               <input ref={fileRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" aria-hidden="true" />
