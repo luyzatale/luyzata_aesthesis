@@ -14,7 +14,7 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
 
-  const { activePoems, loaded } = usePoems(initial)
+  const { activePoems, saveEdit, loaded } = usePoems(initial)
   const shown = loaded ? activePoems.filter((p) => p.featured).slice(0, 3) : []
 
   return (
@@ -54,7 +54,7 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ duration: 0.5, delay: inView ? i * 0.12 : 0, ease: [0.16, 1, 0.3, 1] as [number,number,number,number] }}
               >
-                <PoemTile poem={poem} onRemove={() => hidePoem(poem.slug)} />
+                <PoemTile poem={poem} onRemove={() => saveEdit(poem.slug, { featured: false })} />
               </motion.div>
             ))}
           </AnimatePresence>
