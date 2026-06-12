@@ -81,7 +81,7 @@ function PhotoTile({ photo, priority = false }: { photo: Photo; priority?: boole
     <Link
       href="/fotos"
       className="block relative overflow-hidden group bg-[var(--bg-surface)]"
-      style={{ aspectRatio: photo.width > photo.height ? '4/3' : '3/4' }}
+      style={{ aspectRatio: (photo.width ?? 4) > (photo.height ?? 3) ? '4/3' : '3/4' }}
       aria-label={`Ver foto: ${photo.caption ?? photo.alt}`}
     >
       <Image
