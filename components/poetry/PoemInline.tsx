@@ -55,6 +55,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
             overrides={overrides}
             onHide={onHide}
             onSave={onSave}
+            featured={overrides?.featured ?? poem.featured}
           />
         </div>
 

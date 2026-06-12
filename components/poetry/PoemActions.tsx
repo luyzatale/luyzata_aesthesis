@@ -10,17 +10,31 @@ interface PoemActionsProps {
   overrides?: Partial<Poem>
   onHide: (slug: string) => void
   onSave: (slug: string, changes: Partial<Poem>) => void
+  featured?: boolean
 }
 
-export default function PoemActions({ poem, overrides, onHide, onSave }: PoemActionsProps) {
+export default function PoemActions({ poem, overrides, onHide, onSave, featured }: PoemActionsProps) {
   const [gatingEdit,   setGatingEdit]   = useState(false)
   const [gatingDelete, setGatingDelete] = useState(false)
   const [editing,      setEditing]      = useState(false)
   const [confirming,   setConfirming]   = useState(false)
 
+  const isFeatured = featured ?? false
+
   return (
     <>
       <div className="flex items-center gap-1" onClick={(e) => e.preventDefault()}>
+        {/* Star / Destaque */}
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSave(poem.slug, { featured: !isFeatured }) }}
+          aria-label={isFeatured ? 'Remover dos destaques' : 'Adicionar aos destaques'}
+          title={isFeatured ? 'Remover dos destaques' : 'Adicionar aos destaques'}
+          className="p-1.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
+          style={{ color: isFeatured ? 'var(--accent)' : 'var(--text-faint)' }}
+        >
+          <StarIcon className="w-3.5 h-3.5" filled={isFeatured} />
+        </button>
+
         {/* Edit */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGatingEdit(true) }}
@@ -82,6 +96,15 @@ export default function PoemActions({ poem, overrides, onHide, onSave }: PoemAct
         />
       )}
     </>
+  )
+}
+
+function StarIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true"
+      fill={filled ? 'currentColor' : 'none'}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
   )
 }
 

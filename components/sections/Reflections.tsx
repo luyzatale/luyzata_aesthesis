@@ -14,11 +14,11 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
 
-  const { activePoems, hidePoem, loaded } = usePoems(initial)
-  const shown = loaded ? activePoems.slice(0, 3) : []
+  const { activePoems, loaded } = usePoems(initial)
+  const shown = loaded ? activePoems.filter((p) => p.featured).slice(0, 3) : []
 
   return (
-    <section ref={ref} className="py-24 px-6" aria-label="Reflexões recentes">
+    <section ref={ref} className="py-24 px-6" aria-label="Poemas em destaque">
       <div className="max-w-site mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -31,12 +31,18 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
             className="font-cinzel text-[var(--text-primary)]"
             style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.875rem)' }}
           >
-            Poemas Recentes
+            Poemas em Destaque
           </h2>
           <p className="font-cormorant italic text-[var(--text-muted)] mt-3 text-lg">
             Fragmentos de percepção e linguagem.
           </p>
         </motion.div>
+
+        {loaded && shown.length === 0 && (
+          <p className="text-center font-cormorant italic text-[var(--text-faint)] text-base pb-8">
+            Assinala uma estrela num poema para o destacar aqui.
+          </p>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <AnimatePresence mode="popLayout">
