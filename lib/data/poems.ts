@@ -12,8 +12,9 @@ export interface Poem {
   featured: boolean
   language: 'pt' | 'en'
   excerpt: string
-  imageKey?: string  // IndexedDB key for attached image blob
-  imageSrc?: string  // resolved blob URL (runtime only, not persisted)
+  imageKey?: string    // IndexedDB key for attached image blob
+  imageSrc?: string    // resolved blob URL (runtime only, not persisted)
+  photoCredit?: string // e.g. "Photo by: João Silva"
 }
 
 export const poems: Poem[] = [

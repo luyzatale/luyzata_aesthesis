@@ -60,14 +60,21 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
 
         {/* Attached image */}
         {poem.imageSrc && (
-          <div className="mb-12 flex justify-start">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={poem.imageSrc}
-              alt={`Imagem associada a ${bannerText}`}
-              className="max-h-80 w-auto object-contain border border-[var(--border)]"
-              style={{ filter: 'contrast(1.04) brightness(0.96)' }}
-            />
+          <div className="mb-12">
+            <div className="flex justify-start">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={poem.imageSrc}
+                alt={`Imagem associada a ${bannerText}`}
+                className="max-h-80 w-auto object-contain border border-[var(--border)]"
+                style={{ filter: 'contrast(1.04) brightness(0.96)' }}
+              />
+            </div>
+            {poem.photoCredit && (
+              <p className="mt-1.5 font-cormorant text-[0.7rem] text-[var(--text-faint)] italic">
+                {poem.photoCredit}
+              </p>
+            )}
           </div>
         )}
 

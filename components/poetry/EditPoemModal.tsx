@@ -29,6 +29,7 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
   const [lang,         setLang]         = useState<'pt' | 'en'>(merged.language ?? 'pt')
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(merged.imageSrc ?? null)
+  const [photoCredit,  setPhotoCredit]  = useState(merged.photoCredit ?? '')
   const [dragging,     setDragging]     = useState(false)
   const [error,        setError]        = useState('')
 
@@ -72,6 +73,7 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
       language:    lang,
       readingTime: Math.max(1, Math.ceil(plainText.split(/\s+/).length / 160)),
       excerpt:     plainText.replace(/\s+/g, ' ').slice(0, 120),
+      photoCredit: photoCredit.trim() || undefined,
     }
 
     if (imageFile) {
@@ -203,6 +205,23 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
                 </div>
               )}
               <input ref={fileRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" aria-hidden="true" />
+
+              {/* Photo credit — only shown when an image is present */}
+              {imagePreview && (
+                <div className="mt-3">
+                  <label htmlFor={`${uid}-credit`} className={labelClass}>
+                    Crédito da Foto
+                  </label>
+                  <input
+                    id={`${uid}-credit`}
+                    type="text"
+                    value={photoCredit}
+                    onChange={(e) => setPhotoCredit(e.target.value)}
+                    placeholder="Photo by:"
+                    className={inputClass}
+                  />
+                </div>
+              )}
             </div>
 
             {error && (

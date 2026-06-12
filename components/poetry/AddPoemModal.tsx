@@ -21,6 +21,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
   const [lang,         setLang]         = useState<'pt' | 'en'>('pt')
   const [imageFile,    setImageFile]    = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string | null>(null)
+  const [photoCredit,  setPhotoCredit]  = useState('')
   const [dragging,     setDragging]     = useState(false)
   const [saving,       setSaving]       = useState(false)
   const [error,        setError]        = useState('')
@@ -85,6 +86,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
         readingTime: Math.max(1, Math.ceil(plainText.split(/\s+/).length / 160)),
         featured:    false,
         language:    lang,
+        ...(photoCredit.trim() && { photoCredit: photoCredit.trim() }),
       }
 
       await onAdd(poem, imageFile ?? undefined)
@@ -256,6 +258,23 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
                 className="sr-only"
                 aria-hidden="true"
               />
+
+              {/* Photo credit — only shown when an image is attached */}
+              {imagePreview && (
+                <div className="mt-3">
+                  <label htmlFor={`${uid}-credit`} className={labelClass}>
+                    Crédito da Foto
+                  </label>
+                  <input
+                    id={`${uid}-credit`}
+                    type="text"
+                    value={photoCredit}
+                    onChange={(e) => setPhotoCredit(e.target.value)}
+                    placeholder="Photo by:"
+                    className={inputClass}
+                  />
+                </div>
+              )}
             </div>
 
             {error && (
