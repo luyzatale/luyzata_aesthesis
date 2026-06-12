@@ -9,6 +9,7 @@ import ShareButtons from '@/components/poetry/ShareButtons'
 import PoemPageActions from '@/components/poetry/PoemPageActions'
 import type { Poem } from '@/lib/data/poems'
 import { formatDate } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface DynamicPoemPageProps {
   slug: string
@@ -18,6 +19,7 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
   const { getUserPoem, loaded } = usePoems([])
   const [poem, setPoem] = useState<Poem | null>(null)
   const [ready, setReady] = useState(false)
+  const { t, locale } = useLanguage()
 
   useEffect(() => {
     if (!loaded) return
@@ -46,16 +48,16 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
     return (
       <div className="min-h-screen flex items-center justify-center px-6 text-center" style={{ paddingTop: 'var(--nav-h)' }}>
         <div>
-          <p className="section-label mb-6">Poema não encontrado</p>
+          <p className="section-label mb-6">{t('poemNotFound')}</p>
           <OrnamentalDivider variant="short" className="mb-8" />
           <p className="font-cormorant italic text-[var(--text-muted)] text-lg mb-8">
-            Este poema não existe ou foi removido.
+            {t('poemNotFoundMsg')}
           </p>
           <Link
             href="/aesthesis"
             className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)] hover:underline"
           >
-            ← Voltar ao arquivo
+            {t('poemBack')}
           </Link>
         </div>
       </div>
@@ -85,11 +87,11 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
             </cite>
             <span className="text-[var(--border-strong)]" aria-hidden>·</span>
             <time dateTime={poem.date} className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)]">
-              {formatDate(poem.date)}
+              {formatDate(poem.date, locale)}
             </time>
             <span className="text-[var(--border-strong)]" aria-hidden>·</span>
             <span className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)]">
-              {poem.readingTime} min de leitura
+              {poem.readingTime} {t('poemMinRead')}
             </span>
           </div>
         </div>
@@ -139,7 +141,7 @@ export default function DynamicPoemPage({ slug }: DynamicPoemPageProps) {
         <OrnamentalDivider className="my-16" />
 
         <div className="text-center mb-16">
-          <p className="section-label mb-4">Partilhar</p>
+          <p className="section-label mb-4">{t('poemShare')}</p>
           <ShareButtons title={poem.title} slug={poem.slug} />
         </div>
       </main>

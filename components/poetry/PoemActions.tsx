@@ -4,6 +4,7 @@ import { useState } from 'react'
 import EditPoemModal from '@/components/poetry/EditPoemModal'
 import PasswordModal from '@/components/ui/PasswordModal'
 import type { Poem } from '@/lib/data/poems'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface PoemActionsProps {
   poem: Poem
@@ -18,6 +19,7 @@ export default function PoemActions({ poem, overrides, onHide, onSave, featured 
   const [gatingDelete, setGatingDelete] = useState(false)
   const [editing,      setEditing]      = useState(false)
   const [confirming,   setConfirming]   = useState(false)
+  const { t } = useLanguage()
 
   const isFeatured = featured ?? false
 
@@ -27,8 +29,8 @@ export default function PoemActions({ poem, overrides, onHide, onSave, featured 
         {/* Star / Destaque */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); onSave(poem.slug, { featured: !isFeatured }) }}
-          aria-label={isFeatured ? 'Remover dos destaques' : 'Adicionar aos destaques'}
-          title={isFeatured ? 'Remover dos destaques' : 'Adicionar aos destaques'}
+          aria-label={isFeatured ? t('poemRemoveFeatured') : t('poemAddFeatured')}
+          title={isFeatured ? t('poemRemoveFeatured') : t('poemAddFeatured')}
           className="p-1.5 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
           style={{ color: isFeatured ? 'var(--accent)' : 'var(--text-faint)' }}
         >
@@ -38,8 +40,8 @@ export default function PoemActions({ poem, overrides, onHide, onSave, featured 
         {/* Edit */}
         <button
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGatingEdit(true) }}
-          aria-label={`Editar: ${poem.title}`}
-          title="Editar poema"
+          aria-label={`${t('poemEditTitle')}: ${poem.title}`}
+          title={t('poemEditTitle')}
           className="p-1.5 text-[var(--text-faint)] hover:text-[var(--accent)] transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded"
         >
           <PencilIcon className="w-3.5 h-3.5" />
@@ -52,20 +54,20 @@ export default function PoemActions({ poem, overrides, onHide, onSave, featured 
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); onHide(poem.slug); setConfirming(false) }}
               className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-red-500 border border-red-500/40 hover:bg-red-500/10 transition-colors focus-visible:outline-none"
             >
-              Confirmar
+              {t('poemConfirm')}
             </button>
             <button
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirming(false) }}
               className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
             >
-              Cancelar
+              {t('poemCancel')}
             </button>
           </span>
         ) : (
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setGatingDelete(true) }}
-            aria-label={`Remover: ${poem.title}`}
-            title="Remover poema"
+            aria-label={`${t('poemRemoveTitle')}: ${poem.title}`}
+            title={t('poemRemoveTitle')}
             className="p-1.5 text-[var(--text-faint)] hover:text-red-500 transition-colors duration-200 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-red-400 rounded"
           >
             <TrashIcon className="w-3.5 h-3.5" />

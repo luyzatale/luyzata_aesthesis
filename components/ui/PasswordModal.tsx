@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 const SECRET = 'Sun*1010'
 
@@ -16,6 +17,7 @@ export default function PasswordModal({ onSuccess, onClose }: PasswordModalProps
   const [value,  setValue]  = useState('')
   const [error,  setError]  = useState(false)
   const [shake,  setShake]  = useState(false)
+  const { t } = useLanguage()
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
@@ -66,7 +68,7 @@ export default function PasswordModal({ onSuccess, onClose }: PasswordModalProps
         >
           <div className="px-8 py-6 border-b border-[var(--border)] flex items-center justify-between">
             <p id={`${uid}-heading`} className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
-              Acesso restrito
+              {t('pwdTitle')}
             </p>
             <button
               onClick={onClose}
@@ -79,7 +81,7 @@ export default function PasswordModal({ onSuccess, onClose }: PasswordModalProps
           <div className="px-8 py-8 space-y-5">
             <div>
               <label htmlFor={`${uid}-pw`} className="block font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--accent)] mb-2">
-                Senha
+                {t('pwdLabel')}
               </label>
               <input
                 id={`${uid}-pw`}
@@ -95,7 +97,7 @@ export default function PasswordModal({ onSuccess, onClose }: PasswordModalProps
               />
               {error && (
                 <p className="mt-2 font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-red-500">
-                  Senha incorreta
+                  {t('pwdError')}
                 </p>
               )}
             </div>
@@ -106,13 +108,13 @@ export default function PasswordModal({ onSuccess, onClose }: PasswordModalProps
               onClick={onClose}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
             >
-              Cancelar
+              {t('modalCancel')}
             </button>
             <button
               onClick={attempt}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none"
             >
-              Entrar
+              {t('pwdEnter')}
             </button>
           </div>
         </motion.div>

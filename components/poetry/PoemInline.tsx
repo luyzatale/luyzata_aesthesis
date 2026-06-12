@@ -6,6 +6,7 @@ import ShareButtons from '@/components/poetry/ShareButtons'
 import PoemActions from '@/components/poetry/PoemActions'
 import type { Poem } from '@/lib/data/poems'
 import { formatDate } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface PoemInlineProps {
   poem:      Poem
@@ -15,8 +16,8 @@ interface PoemInlineProps {
 }
 
 export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInlineProps) {
-  // When no title, use the author's name in the banner
   const bannerText = poem.title.trim() || poem.author
+  const { t, locale } = useLanguage()
 
   return (
     <div className="border border-[var(--border)] bg-[var(--bg-surface)]">
@@ -34,11 +35,11 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
           </cite>
           <span className="text-[var(--border-strong)]" aria-hidden>·</span>
           <time dateTime={poem.date} className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)]">
-            {formatDate(poem.date)}
+            {formatDate(poem.date, locale)}
           </time>
           <span className="text-[var(--border-strong)]" aria-hidden>·</span>
           <span className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)]">
-            {poem.readingTime} min de leitura
+            {poem.readingTime} {t('poemMinRead')}
           </span>
         </div>
         </div>
@@ -66,7 +67,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={poem.imageSrc}
-                alt={`Imagem associada a ${bannerText}`}
+                alt={`${t('poemShare')} — ${bannerText}`}
                 className="max-h-80 w-auto object-contain border border-[var(--border)]"
                 style={{ filter: 'contrast(1.04) brightness(0.96)' }}
               />
@@ -99,7 +100,7 @@ export default function PoemInline({ poem, onHide, onSave, overrides }: PoemInli
         <OrnamentalDivider className="my-14" />
 
         <div className="text-center">
-          <p className="section-label mb-4">Partilhar</p>
+          <p className="section-label mb-4">{t('poemShare')}</p>
           <ShareButtons title={bannerText} slug={poem.slug} />
         </div>
         </div>

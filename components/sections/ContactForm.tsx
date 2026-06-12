@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import InkButton from '@/components/ui/InkButton'
 import OrnamentalDivider from '@/components/ui/OrnamentalDivider'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface FormState {
   name: string
@@ -23,6 +24,7 @@ const initialState: FormState = {
 export default function ContactForm() {
   const [form, setForm] = useState<FormState>(initialState)
   const [status, setStatus] = useState<Status>('idle')
+  const { t } = useLanguage()
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -33,7 +35,6 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setStatus('submitting')
-    // Simulate sending (replace with your email API)
     await new Promise((res) => setTimeout(res, 1400))
     setStatus('success')
     setForm(initialState)
@@ -49,10 +50,10 @@ export default function ContactForm() {
           className="font-cormorant italic text-[var(--text-primary)]"
           style={{ fontSize: 'clamp(1.125rem, 2vw, 1.5rem)' }}
         >
-          Mensagem recebida.
+          {t('contactSuccessTitle')}
         </p>
         <p className="font-cormorant italic text-[var(--text-muted)] text-base">
-          Obrigada pelo contacto. Responderei em breve.
+          {t('contactSuccessSub')}
         </p>
         <div className="pt-6">
           <InkButton
@@ -60,7 +61,7 @@ export default function ContactForm() {
             variant="ghost"
             size="sm"
           >
-            Enviar outra mensagem
+            {t('contactSuccessBtn')}
           </InkButton>
         </div>
       </div>
@@ -74,9 +75,9 @@ export default function ContactForm() {
     'block font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] mb-2'
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="space-y-6" aria-label="Formulário de contato">
+    <form onSubmit={handleSubmit} noValidate className="space-y-6" aria-label={t('contactFormAria')}>
       <div>
-        <label htmlFor="name" className={labelClass}>Nome</label>
+        <label htmlFor="name" className={labelClass}>{t('contactNameLabel')}</label>
         <input
           id="name"
           name="name"
@@ -85,7 +86,7 @@ export default function ContactForm() {
           autoComplete="name"
           value={form.name}
           onChange={handleChange}
-          placeholder="O seu nome"
+          placeholder={t('contactNamePlaceholder')}
           className={fieldClass}
         />
       </div>
@@ -100,13 +101,13 @@ export default function ContactForm() {
           autoComplete="email"
           value={form.email}
           onChange={handleChange}
-          placeholder="o.seu@email.com"
+          placeholder={t('contactEmailPlaceholder')}
           className={fieldClass}
         />
       </div>
 
       <div>
-        <label htmlFor="subject" className={labelClass}>Assunto</label>
+        <label htmlFor="subject" className={labelClass}>{t('contactSubjectLabel')}</label>
         <select
           id="subject"
           name="subject"
@@ -116,17 +117,17 @@ export default function ContactForm() {
           className={`${fieldClass} cursor-pointer`}
           style={{ appearance: 'none' }}
         >
-          <option value="" disabled>Selecione um assunto</option>
-          <option value="colaboracao">Colaboração artística</option>
-          <option value="exposicao">Exposição ou publicação</option>
-          <option value="projeto">Projeto literário ou fotográfico</option>
-          <option value="pensamento">Partilhar um pensamento</option>
-          <option value="outro">Outro</option>
+          <option value="" disabled>{t('contactSubjectDefault')}</option>
+          <option value="colaboracao">{t('contactSubjectCollab')}</option>
+          <option value="exposicao">{t('contactSubjectExpo')}</option>
+          <option value="projeto">{t('contactSubjectProject')}</option>
+          <option value="pensamento">{t('contactSubjectThought')}</option>
+          <option value="outro">{t('contactSubjectOther')}</option>
         </select>
       </div>
 
       <div>
-        <label htmlFor="message" className={labelClass}>Mensagem</label>
+        <label htmlFor="message" className={labelClass}>{t('contactMessageLabel')}</label>
         <textarea
           id="message"
           name="message"
@@ -134,14 +135,14 @@ export default function ContactForm() {
           rows={7}
           value={form.message}
           onChange={handleChange}
-          placeholder="Escreva a sua mensagem…"
+          placeholder={t('contactMessagePlaceholder')}
           className={`${fieldClass} resize-none`}
         />
       </div>
 
       {status === 'error' && (
         <p className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-red-600 dark:text-red-400">
-          Ocorreu um erro. Tente novamente ou envie por email direto.
+          {t('contactError')}
         </p>
       )}
 
@@ -153,7 +154,7 @@ export default function ContactForm() {
           disabled={status === 'submitting'}
           className="w-full"
         >
-          {status === 'submitting' ? 'Enviando…' : 'Enviar Mensagem'}
+          {status === 'submitting' ? t('contactSubmitting') : t('contactSubmit')}
         </InkButton>
       </div>
     </form>

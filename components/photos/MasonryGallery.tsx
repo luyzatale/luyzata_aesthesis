@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import PasswordModal from '@/components/ui/PasswordModal'
 import type { DisplayPhoto } from '@/lib/hooks/usePhotos'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface MasonryGalleryProps {
   photos:       DisplayPhoto[]
@@ -12,6 +13,7 @@ interface MasonryGalleryProps {
 }
 
 export default function MasonryGallery({ photos, onDelete, onEditAlt }: MasonryGalleryProps) {
+  const { t } = useLanguage()
   const [activeIndex,   setActiveIndex]   = useState<number | null>(null)
   const [gatingAction,  setGatingAction]  = useState<'edit' | 'delete' | null>(null)
   const [editMode,      setEditMode]      = useState(false)
@@ -69,7 +71,7 @@ export default function MasonryGallery({ photos, onDelete, onEditAlt }: MasonryG
   return (
     <>
       <p className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)] mb-8">
-        {photos.length} imagens
+        {photos.length} {t('galleryImages')}
       </p>
 
       <div className="masonry-grid">
@@ -83,7 +85,7 @@ export default function MasonryGallery({ photos, onDelete, onEditAlt }: MasonryG
               <button
                 onClick={() => open(i)}
                 className="w-full block relative overflow-hidden group bg-[var(--bg-surface)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
-                aria-label={`Ampliar imagem ${i + 1}`}
+                aria-label={`${t('galleryImages')} ${i + 1}`}
               >
                 <PhotoImg
                   photo={photo}
@@ -178,6 +180,7 @@ function Lightbox({
 }: LightboxProps) {
   const altRef = useRef<HTMLInputElement>(null)
   const [altValue, setAltValue] = useState(photo.alt)
+  const { t } = useLanguage()
 
   useEffect(() => { setAltValue(photo.alt) }, [photo.alt, photo.id])
   useEffect(() => {
@@ -211,7 +214,7 @@ function Lightbox({
       {!editMode && !deletePending && (
         <button
           onClick={(e) => { e.stopPropagation(); onPrev() }}
-          aria-label="Imagem anterior"
+          aria-label={t('galleryAriaPrev')}
           className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 text-leather-300 hover:text-white transition-colors focus-visible:outline-none"
         >
           <ChevronIcon direction="left" />
@@ -222,7 +225,7 @@ function Lightbox({
       {!editMode && !deletePending && (
         <button
           onClick={(e) => { e.stopPropagation(); onNext() }}
-          aria-label="Próxima imagem"
+          aria-label={t('galleryAriaNext')}
           className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 text-leather-300 hover:text-white transition-colors focus-visible:outline-none"
         >
           <ChevronIcon direction="right" />
@@ -254,20 +257,20 @@ function Lightbox({
                       onClick={() => onSaveAlt(altValue)}
                       className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase px-3 py-1 bg-[var(--accent)] text-[var(--bg)] hover:opacity-80 transition-opacity focus-visible:outline-none"
                     >
-                      Guardar
+                      {t('gallerySave')}
                     </button>
                     <button
                       onClick={onCancelEdit}
                       className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-leather-400 hover:text-white transition-colors focus-visible:outline-none"
                     >
-                      Cancelar
+                      {t('modalCancel')}
                     </button>
                   </span>
                 ) : (
                   <button
                     onClick={onRequestEdit}
-                    aria-label="Editar descrição"
-                    title="Editar descrição"
+                    aria-label={t('galleryEditAria')}
+                    title={t('galleryEditAria')}
                     className="p-1.5 text-leather-400 hover:text-[var(--accent)] transition-colors focus-visible:outline-none"
                   >
                     <PencilIcon className="w-4 h-4" />
@@ -283,20 +286,20 @@ function Lightbox({
                       onClick={onConfirmDelete}
                       className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase px-3 py-1 text-red-400 border border-red-500/40 hover:bg-red-500/10 transition-colors focus-visible:outline-none"
                     >
-                      Confirmar
+                      {t('galleryConfirm')}
                     </button>
                     <button
                       onClick={onCancelDelete}
                       className="font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-leather-400 hover:text-white transition-colors focus-visible:outline-none"
                     >
-                      Cancelar
+                      {t('modalCancel')}
                     </button>
                   </span>
                 ) : (
                   <button
                     onClick={onRequestDelete}
-                    aria-label="Eliminar imagem"
-                    title="Eliminar imagem"
+                    aria-label={t('galleryDeleteAria')}
+                    title={t('galleryDeleteAria')}
                     className="p-1.5 text-leather-400 hover:text-red-400 transition-colors focus-visible:outline-none"
                   >
                     <TrashIcon className="w-4 h-4" />
@@ -306,10 +309,10 @@ function Lightbox({
 
               <button
                 onClick={onClose}
-                aria-label="Fechar"
+                aria-label={t('modalCloseAria')}
                 className="text-leather-300 hover:text-white transition-colors font-cinzel text-[0.6rem] tracking-[0.15em] uppercase flex items-center gap-2 focus-visible:outline-none"
               >
-                Fechar ✕
+                {t('galleryClose')}
               </button>
             </div>
           </div>
@@ -334,7 +337,7 @@ function Lightbox({
                   if (e.key === 'Enter') onSaveAlt(altValue)
                   if (e.key === 'Escape') onCancelEdit()
                 }}
-                placeholder="Descrição da imagem"
+                placeholder={t('galleryAltPlaceholder')}
                 className="flex-1 bg-[var(--bg)] border border-[var(--border)] text-[var(--text-primary)] font-garamond text-sm px-3 py-2 focus:outline-none focus:border-[var(--accent)] transition-colors"
               />
             </div>

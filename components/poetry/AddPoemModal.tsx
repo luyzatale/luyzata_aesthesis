@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import RichEditor from '@/components/poetry/RichEditor'
 import type { Poem } from '@/lib/data/poems'
 import { slugify } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface AddPoemModalProps {
   onAdd:   (poem: Poem, imageFile?: File) => Promise<void>
@@ -14,6 +15,7 @@ interface AddPoemModalProps {
 export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
   const uid     = useId()
   const fileRef = useRef<HTMLInputElement>(null)
+  const { t } = useLanguage()
 
   const [title,        setTitle]        = useState('')
   const [author,       setAuthor]       = useState('L. Serrano')
@@ -38,13 +40,13 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
 
   const handleImageFile = useCallback((f: File) => {
     if (!f.type.startsWith('image/')) {
-      setError('Selecione um ficheiro de imagem válido.')
+      setError(t('errorInvalidImg'))
       return
     }
     setImageFile(f)
     setImagePreview(URL.createObjectURL(f))
     setError('')
-  }, [])
+  }, [t])
 
   const onFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -66,7 +68,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
 
   const handleAdd = async () => {
     const plainText = body.replace(/<[^>]+>/g, '').trim()
-    if (!plainText) { setError('Escreva pelo menos um verso.'); return }
+    if (!plainText) { setError(t('errorEmptyPoem')); return }
 
     setSaving(true)
     try {
@@ -92,7 +94,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
       await onAdd(poem, imageFile ?? undefined)
       onClose()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erro ao guardar. Tente novamente.')
+      setError(err instanceof Error ? err.message : t('errorSave'))
       setSaving(false)
     }
   }
@@ -126,14 +128,14 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--border)]">
             <p id={`${uid}-title`} className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
-              Novo Poema
+              {t('addPoemTitle')}
             </p>
             <button
               onClick={onClose}
-              aria-label="Fechar"
+              aria-label={t('modalCloseAria')}
               className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors font-cinzel text-[0.6rem] tracking-[0.12em] uppercase focus-visible:outline-none"
             >
-              Fechar ✕
+              {t('modalClose')}
             </button>
           </div>
 
@@ -143,19 +145,19 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
             {/* Title + Author */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor={`${uid}-ttl`} className={labelClass}>Título</label>
+                <label htmlFor={`${uid}-ttl`} className={labelClass}>{t('fieldTitle')}</label>
                 <input
                   id={`${uid}-ttl`}
                   type="text"
                   value={title}
                   onChange={(e) => { setTitle(e.target.value); setError('') }}
-                  placeholder="Título do poema (opcional)"
+                  placeholder={t('fieldTitlePlaceholder')}
                   className={inputClass}
                   autoFocus
                 />
               </div>
               <div>
-                <label htmlFor={`${uid}-aut`} className={labelClass}>Autor</label>
+                <label htmlFor={`${uid}-aut`} className={labelClass}>{t('fieldAuthor')}</label>
                 <input
                   id={`${uid}-aut`}
                   type="text"
@@ -169,7 +171,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
 
             {/* Language */}
             <div>
-              <p className={labelClass}>Língua</p>
+              <p className={labelClass}>{t('fieldLang')}</p>
               <div className="flex gap-3">
                 {(['pt', 'en'] as const).map((l) => (
                   <button
@@ -190,11 +192,11 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
 
             {/* Poem body */}
             <div>
-              <p className={labelClass}>Poema *</p>
+              <p className={labelClass}>{t('fieldPoem')}</p>
               <RichEditor
                 value={body}
                 onChange={setBody}
-                placeholder="Escreve o poema aqui…"
+                placeholder={t('fieldPoemPlaceholder')}
                 minRows={10}
               />
             </div>
@@ -202,7 +204,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
             {/* Image attachment */}
             <div>
               <p className={labelClass}>
-                Imagem <span className="normal-case text-[var(--text-faint)]">(opcional)</span>
+                {t('fieldImgLabel')} <span className="normal-case text-[var(--text-faint)]">{t('fieldImgOptional')}</span>
               </p>
 
               {imagePreview ? (
@@ -210,7 +212,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={imagePreview}
-                    alt="Pré-visualização"
+                    alt={t('addPhotoPreview')}
                     className="w-full max-h-56 object-cover border border-[var(--border)]"
                   />
                   <button
@@ -218,7 +220,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
                     onClick={removeImage}
                     className="absolute top-2 right-2 bg-[var(--bg-overlay)] border border-[var(--border)] font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-[var(--text-muted)] hover:text-red-500 transition-colors"
                   >
-                    Remover
+                    {t('fieldImgRemove')}
                   </button>
                   <p className="font-cinzel text-[0.5rem] tracking-[0.1em] uppercase text-[var(--text-faint)] mt-1.5">
                     {imageFile?.name} · {imageFile ? (imageFile.size / 1024 / 1024).toFixed(1) : 0} MB
@@ -237,12 +239,12 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
                   }`}
                   role="button"
                   tabIndex={0}
-                  aria-label="Selecionar ou arrastar imagem"
+                  aria-label={t('modalAriaImg')}
                   onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
                 >
                   <ImageIcon className="w-6 h-6 text-[var(--text-faint)]" />
                   <p className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--text-faint)]">
-                    Clique ou arraste uma imagem
+                    {t('fieldImgClickDrag')}
                   </p>
                   <p className="font-cormorant italic text-[var(--text-faint)] text-xs">
                     JPG, PNG, AVIF, WEBP, GIF
@@ -263,7 +265,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
               {imagePreview && (
                 <div className="mt-3">
                   <label htmlFor={`${uid}-credit`} className={labelClass}>
-                    Crédito da Foto
+                    {t('fieldCreditLabel')}
                   </label>
                   <input
                     id={`${uid}-credit`}
@@ -291,7 +293,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
               onClick={onClose}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
             >
-              Cancelar
+              {t('modalCancel')}
             </button>
             <button
               type="button"
@@ -299,7 +301,7 @@ export default function AddPoemModal({ onAdd, onClose }: AddPoemModalProps) {
               disabled={saving}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
             >
-              {saving ? 'A guardar…' : 'Adicionar Poema'}
+              {saving ? t('saving') : t('addPoemSubmit')}
             </button>
           </div>
         </motion.div>

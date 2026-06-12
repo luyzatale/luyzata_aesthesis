@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { upload } from '@vercel/blob/client'
 import RichEditor from '@/components/poetry/RichEditor'
 import type { Poem } from '@/lib/data/poems'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface EditPoemModalProps {
   poem:       Poem
@@ -17,13 +18,12 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
   const uid     = useId()
   const fileRef = useRef<HTMLInputElement>(null)
   const merged  = { ...poem, ...overrides }
+  const { t } = useLanguage()
 
-  // Join stanzas into one body for the single editor
   const [title,        setTitle]        = useState(merged.title)
   const [author,       setAuthor]       = useState(merged.author)
   const [body,         setBody]         = useState(() => {
     const raw = merged.body.join('\n\n')
-    // If it's already HTML (contains tags), use as-is; otherwise convert newlines to <br>
     return /<[^>]+>/.test(raw) ? raw : raw.replace(/\n/g, '<br>')
   })
   const [lang,         setLang]         = useState<'pt' | 'en'>(merged.language ?? 'pt')
@@ -44,11 +44,11 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
   }, [onClose])
 
   const handleImageFile = useCallback((f: File) => {
-    if (!f.type.startsWith('image/')) { setError('Selecione um ficheiro de imagem válido.'); return }
+    if (!f.type.startsWith('image/')) { setError(t('errorInvalidImg')); return }
     setImageFile(f)
     setImagePreview(URL.createObjectURL(f))
     setError('')
-  }, [])
+  }, [t])
 
   const onFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]; if (f) handleImageFile(f)
@@ -64,7 +64,7 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
 
   const handleSave = async () => {
     const plainText = body.replace(/<[^>]+>/g, '').trim()
-    if (!plainText) { setError('Escreva pelo menos um verso.'); return }
+    if (!plainText) { setError(t('errorEmptyPoem')); return }
 
     const changes: Partial<Poem> = {
       title,
@@ -120,11 +120,11 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--border)]">
             <p id={`${uid}-title`} className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
-              Editar Poema
+              {t('editPoemTitle')}
             </p>
-            <button onClick={onClose} aria-label="Fechar"
+            <button onClick={onClose} aria-label={t('modalCloseAria')}
               className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors font-cinzel text-[0.6rem] tracking-[0.12em] uppercase focus-visible:outline-none">
-              Fechar ✕
+              {t('modalClose')}
             </button>
           </div>
 
@@ -134,13 +134,13 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
             {/* Title + Author */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor={`${uid}-ttl`} className={labelClass}>Título</label>
+                <label htmlFor={`${uid}-ttl`} className={labelClass}>{t('fieldTitle')}</label>
                 <input id={`${uid}-ttl`} type="text" value={title}
                   onChange={(e) => { setTitle(e.target.value); setError('') }}
-                  placeholder="Título do poema (opcional)" className={inputClass} autoFocus />
+                  placeholder={t('fieldTitlePlaceholder')} className={inputClass} autoFocus />
               </div>
               <div>
-                <label htmlFor={`${uid}-aut`} className={labelClass}>Autor</label>
+                <label htmlFor={`${uid}-aut`} className={labelClass}>{t('fieldAuthor')}</label>
                 <input id={`${uid}-aut`} type="text" value={author}
                   onChange={(e) => setAuthor(e.target.value)}
                   placeholder="L. Serrano" className={inputClass} />
@@ -149,7 +149,7 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
 
             {/* Language */}
             <div>
-              <p className={labelClass}>Língua</p>
+              <p className={labelClass}>{t('fieldLang')}</p>
               <div className="flex gap-3">
                 {(['pt', 'en'] as const).map((l) => (
                   <button key={l} type="button" onClick={() => setLang(l)}
@@ -166,23 +166,23 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
 
             {/* Poem body */}
             <div>
-              <p className={labelClass}>Poema *</p>
-              <RichEditor value={body} onChange={setBody} placeholder="Escreve o poema aqui…" minRows={10} />
+              <p className={labelClass}>{t('fieldPoem')}</p>
+              <RichEditor value={body} onChange={setBody} placeholder={t('fieldPoemPlaceholder')} minRows={10} />
             </div>
 
             {/* Image */}
             <div>
               <p className={labelClass}>
-                Imagem <span className="normal-case text-[var(--text-faint)]">(opcional)</span>
+                {t('fieldImgLabel')} <span className="normal-case text-[var(--text-faint)]">{t('fieldImgOptional')}</span>
               </p>
               {imagePreview ? (
                 <div className="relative">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imagePreview} alt="Pré-visualização"
+                  <img src={imagePreview} alt={t('addPhotoPreview')}
                     className="w-full max-h-56 object-cover border border-[var(--border)]" />
                   <button type="button" onClick={removeImage}
                     className="absolute top-2 right-2 bg-[var(--bg-overlay)] border border-[var(--border)] font-cinzel text-[0.5rem] tracking-[0.1em] uppercase px-2 py-1 text-[var(--text-muted)] hover:text-red-500 transition-colors">
-                    Remover
+                    {t('fieldImgRemove')}
                   </button>
                 </div>
               ) : (
@@ -194,23 +194,22 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
                   className={`cursor-pointer border border-dashed flex flex-col items-center justify-center gap-2 py-8 transition-all duration-300 ${
                     dragging ? 'border-[var(--accent)]' : 'border-[var(--border)] hover:border-[var(--accent)] bg-[var(--bg)]'
                   }`}
-                  role="button" tabIndex={0} aria-label="Selecionar ou arrastar imagem"
+                  role="button" tabIndex={0} aria-label={t('modalAriaImg')}
                   onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
                 >
                   <ImageIcon className="w-6 h-6 text-[var(--text-faint)]" />
                   <p className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--text-faint)]">
-                    Clique ou arraste uma imagem
+                    {t('fieldImgClickDrag')}
                   </p>
                   <p className="font-cormorant italic text-[var(--text-faint)] text-xs">JPG, PNG, AVIF, WEBP, GIF</p>
                 </div>
               )}
               <input ref={fileRef} type="file" accept="image/*" onChange={onFileInput} className="sr-only" aria-hidden="true" />
 
-              {/* Photo credit — only shown when an image is present */}
               {imagePreview && (
                 <div className="mt-3">
                   <label htmlFor={`${uid}-credit`} className={labelClass}>
-                    Crédito da Foto
+                    {t('fieldCreditLabel')}
                   </label>
                   <input
                     id={`${uid}-credit`}
@@ -233,11 +232,11 @@ export default function EditPoemModal({ poem, overrides, onSave, onClose }: Edit
           <div className="px-8 py-5 border-t border-[var(--border)] flex items-center justify-end gap-4">
             <button onClick={onClose}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none">
-              Cancelar
+              {t('modalCancel')}
             </button>
             <button onClick={handleSave}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none">
-              Guardar
+              {t('editPoemSave')}
             </button>
           </div>
         </motion.div>

@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import Link from 'next/link'
 import type { Poem } from '@/lib/data/poems'
 import { usePoems } from '@/lib/hooks/usePoems'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface ReflectionsProps {
   poems: Poem[]
@@ -16,9 +17,10 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
 
   const { activePoems, saveEdit, loaded } = usePoems(initial)
   const shown = loaded ? activePoems.filter((p) => p.featured).slice(0, 3) : []
+  const { t } = useLanguage()
 
   return (
-    <section ref={ref} className="py-24 px-6" aria-label="Poemas em destaque">
+    <section ref={ref} className="py-24 px-6" aria-label={t('reflAriaSection')}>
       <div className="max-w-site mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -31,16 +33,16 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
             className="font-cinzel text-[var(--text-primary)]"
             style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.875rem)' }}
           >
-            Poemas em Destaque
+            {t('reflTitle')}
           </h2>
           <p className="font-cormorant italic text-[var(--text-muted)] mt-3 text-lg">
-            Fragmentos de percepção e linguagem.
+            {t('reflSub')}
           </p>
         </motion.div>
 
         {loaded && shown.length === 0 && (
           <p className="text-center font-cormorant italic text-[var(--text-faint)] text-base pb-8">
-            Assinala uma estrela num poema para o destacar aqui.
+            {t('reflEmpty')}
           </p>
         )}
 
@@ -70,7 +72,7 @@ export default function Reflections({ poems: initial }: ReflectionsProps) {
             href="/aesthesis"
             className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 flex items-center justify-center gap-2 group"
           >
-            Ver todos os poemas
+            {t('reflCta')}
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Link>
         </motion.div>

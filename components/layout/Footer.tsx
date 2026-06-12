@@ -1,16 +1,20 @@
+'use client'
+
 import Link from 'next/link'
 import OrnamentalDivider from '@/components/ui/OrnamentalDivider'
-
-const navLinks = [
-  { href: '/',          label: 'Home' },
-  { href: '/aesthesis', label: 'Aesthesis' },
-  { href: '/fotos',     label: 'Fotos' },
-  { href: '/sobre',     label: 'Sobre' },
-  { href: '/contato',   label: 'Contato' },
-]
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 export default function Footer() {
   const year = new Date().getFullYear()
+  const { t } = useLanguage()
+
+  const navLinks = [
+    { href: '/',          label: 'Home' },
+    { href: '/aesthesis', label: 'Aesthesis' },
+    { href: '/fotos',     label: t('fotosTitle') },
+    { href: '/sobre',     label: t('navLinkSobre') },
+    { href: '/contato',   label: t('navLinkContato') },
+  ]
 
   return (
     <footer className="pt-16 pb-10 px-6 border-t border-[var(--border)]">
@@ -26,19 +30,19 @@ export default function Footer() {
               Aesthesis
             </h3>
             <p className="font-cormorant italic text-[var(--text-muted)] text-sm leading-relaxed max-w-xs">
-              αἴσθησις — Percepção pelos Sentidos, Sensação, Experiência Sensível ou Capacidade de Sentir.
+              {t('footerTagline')}
             </p>
             <p className="font-cormorant italic text-[var(--text-faint)] text-xs">
-              Palavras e imagens por Luyza T.A.
+              {t('footerCredit')}
             </p>
           </div>
 
           {/* Navigation */}
           <div className="space-y-4">
             <h3 className="font-cinzel text-xs tracking-[0.2em] uppercase text-[var(--text-muted)]">
-              Navegação
+              {t('footerNavTitle')}
             </h3>
-            <nav className="flex flex-col gap-2" aria-label="Rodapé">
+            <nav className="flex flex-col gap-2" aria-label={t('footerNavAria')}>
               {navLinks.map(({ href, label }) => (
                 <Link
                   key={href}
@@ -54,7 +58,7 @@ export default function Footer() {
           {/* Quote */}
           <div className="space-y-4">
             <h3 className="font-cinzel text-xs tracking-[0.2em] uppercase text-[var(--text-muted)]">
-              Inscrição
+              {t('footerInscTitle')}
             </h3>
             <blockquote className="font-cormorant italic text-[var(--text-muted)] text-sm leading-loose border-l border-[var(--border-strong)] pl-4">
               "Transeuntes eternos de nós mesmos,
@@ -74,7 +78,7 @@ export default function Footer() {
             © {year} Aesthesis — Luyza T.A.
           </p>
           <p className="font-cormorant italic text-[var(--text-faint)] text-xs">
-            Feito com palavras e silêncio.
+            {t('footerMadeWith')}
           </p>
         </div>
       </div>

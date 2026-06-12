@@ -3,6 +3,7 @@ import { Cinzel, Cormorant_Garamond, EB_Garamond, Caveat } from 'next/font/googl
 import Navigation from '@/components/layout/Navigation'
 import Footer from '@/components/layout/Footer'
 import CornerFrame from '@/components/ui/CornerFrame'
+import { LanguageProvider } from '@/lib/i18n/LanguageContext'
 import './globals.css'
 
 const cinzel = Cinzel({
@@ -96,10 +97,12 @@ export default function RootLayout({
       <body
         className={`${cinzel.variable} ${cormorant.variable} ${ebGaramond.variable} ${caveat.variable}`}
       >
-        <Navigation />
-        <CornerFrame />
-        <main>{children}</main>
-        <Footer />
+        <LanguageProvider>
+          <Navigation />
+          <CornerFrame />
+          <main>{children}</main>
+          <Footer />
+        </LanguageProvider>
       </body>
     </html>
   )

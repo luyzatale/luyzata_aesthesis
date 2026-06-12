@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useId } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface AddPhotoModalProps {
   onAdd:    (file: File) => Promise<unknown>
@@ -11,6 +12,7 @@ interface AddPhotoModalProps {
 export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
   const uid     = useId()
   const fileRef = useRef<HTMLInputElement>(null)
+  const { t } = useLanguage()
 
   const [file,     setFile]     = useState<File | null>(null)
   const [preview,  setPreview]  = useState<string | null>(null)
@@ -30,13 +32,13 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith('image/')) {
-      setError('Por favor selecione um ficheiro de imagem.')
+      setError(t('addPhotoErrorImg'))
       return
     }
     setFile(f)
     setPreview(URL.createObjectURL(f))
     setError('')
-  }, [])
+  }, [t])
 
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0]
@@ -51,13 +53,13 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
   }
 
   const handleSave = async () => {
-    if (!file) { setError('Selecione uma imagem.'); return }
+    if (!file) { setError(t('addPhotoErrorSelect')); return }
     setSaving(true)
     try {
       await onAdd(file)
       onClose()
     } catch {
-      setError('Erro ao guardar. Tente novamente.')
+      setError(t('errorSave'))
       setSaving(false)
     }
   }
@@ -86,14 +88,14 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
           {/* Header */}
           <div className="flex items-center justify-between px-8 py-5 border-b border-[var(--border)]">
             <p id={`${uid}-heading`} className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--accent)]">
-              Nova Fotografia
+              {t('addPhotoTitle')}
             </p>
             <button
               onClick={onClose}
-              aria-label="Fechar"
+              aria-label={t('modalCloseAria')}
               className="text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors font-cinzel text-[0.6rem] tracking-[0.12em] uppercase focus-visible:outline-none"
             >
-              Fechar ✕
+              {t('modalClose')}
             </button>
           </div>
 
@@ -112,24 +114,24 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
               style={{ minHeight: preview ? 'auto' : '200px', background: 'var(--bg)' }}
               role="button"
               tabIndex={0}
-              aria-label="Selecionar ou arrastar imagem"
+              aria-label={t('addPhotoAriaSelect')}
               onKeyDown={(e) => e.key === 'Enter' && fileRef.current?.click()}
             >
               {preview ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={preview}
-                  alt="Pré-visualização"
+                  alt={t('addPhotoPreview')}
                   className="w-full max-h-72 object-contain"
                 />
               ) : (
                 <>
                   <UploadIcon className="w-8 h-8 text-[var(--text-faint)]" />
                   <p className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-faint)] text-center px-4">
-                    Clique para selecionar ou arraste uma imagem
+                    {t('addPhotoClick')}
                   </p>
                   <p className="font-cormorant italic text-[var(--text-faint)] text-xs">
-                    JPG, PNG, AVIF, WEBP
+                    {t('addPhotoFormats')}
                   </p>
                 </>
               )}
@@ -164,7 +166,7 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
               onClick={onClose}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none"
             >
-              Cancelar
+              {t('modalCancel')}
             </button>
             <button
               type="button"
@@ -172,7 +174,7 @@ export default function AddPhotoModal({ onAdd, onClose }: AddPhotoModalProps) {
               disabled={saving || !file}
               className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-6 py-2.5 bg-[var(--text-primary)] text-[var(--bg)] hover:bg-[var(--accent)] transition-colors focus-visible:outline-none disabled:opacity-50 disabled:pointer-events-none"
             >
-              {saving ? 'A guardar…' : 'Adicionar'}
+              {saving ? t('saving') : t('addPhotoAdd')}
             </button>
           </div>
         </motion.div>

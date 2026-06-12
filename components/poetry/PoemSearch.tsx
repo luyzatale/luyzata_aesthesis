@@ -6,6 +6,7 @@ import AddPoemModal from '@/components/poetry/AddPoemModal'
 import PasswordModal from '@/components/ui/PasswordModal'
 import { usePoems } from '@/lib/hooks/usePoems'
 import type { Poem } from '@/lib/data/poems'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface PoemSearchProps {
   poems: Poem[]
@@ -15,6 +16,7 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
   const [query,        setQuery]        = useState('')
   const [gatingPoem,   setGatingPoem]   = useState(false)
   const [addingPoem,   setAddingPoem]   = useState(false)
+  const { t } = useLanguage()
 
   const { activePoems, hidePoem, saveEdit, addPoem, getEdited, loaded } = usePoems(initial)
 
@@ -34,12 +36,12 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
       {/* Top bar */}
       <div className="flex flex-wrap items-end gap-4 mb-6">
         <div className="relative flex-1 min-w-0 max-w-md">
-          <label htmlFor="poem-search" className="sr-only">Pesquisar poemas</label>
+          <label htmlFor="poem-search" className="sr-only">{t('searchAriaLabel')}</label>
           <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--text-faint)] pointer-events-none" />
           <input
             id="poem-search"
             type="search"
-            placeholder="Pesquisar poemas…"
+            placeholder={t('searchPlaceholder')}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="w-full pl-11 pr-4 py-3 bg-[var(--bg-surface)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-faint)] font-cormorant italic text-base focus:outline-none focus:border-[var(--accent)] transition-colors duration-300"
@@ -49,24 +51,24 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
         <button
           onClick={() => setGatingPoem(true)}
           className="flex-shrink-0 flex items-center gap-2 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-5 py-3 border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
-          aria-label="Adicionar novo poema"
+          aria-label={t('searchNewPoemAria')}
         >
           <PlusIcon className="w-3.5 h-3.5" />
-          Novo Poema
+          {t('searchNewPoem')}
         </button>
       </div>
 
       <p className="font-cinzel text-[0.6rem] tracking-[0.12em] uppercase text-[var(--text-faint)] mb-10">
         {!loaded
-          ? 'A carregar…'
+          ? t('searchLoading')
           : filtered.length === activePoems.length
-            ? `${activePoems.length} poemas`
-            : `${filtered.length} de ${activePoems.length} poemas`}
+            ? `${activePoems.length} ${t('searchPoems')}`
+            : `${filtered.length} ${t('searchOf')} ${activePoems.length} ${t('searchPoems')}`}
       </p>
 
       {!loaded ? (
         <div className="py-20 text-center">
-          <p className="font-cormorant italic text-[var(--text-faint)] text-lg">A carregar…</p>
+          <p className="font-cormorant italic text-[var(--text-faint)] text-lg">{t('searchLoading')}</p>
         </div>
       ) : filtered.length > 0 ? (
         <div className="space-y-10">
@@ -83,14 +85,14 @@ export default function PoemSearch({ poems: initial }: PoemSearchProps) {
       ) : (
         <div className="py-20 text-center">
           <p className="font-cormorant italic text-[var(--text-muted)] text-lg">
-            Nenhum poema encontrado.
+            {t('searchEmpty')}
           </p>
           {query && (
             <button
               onClick={() => setQuery('')}
               className="mt-4 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--accent)] hover:underline"
             >
-              Limpar filtros
+              {t('searchClear')}
             </button>
           )}
         </div>

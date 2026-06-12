@@ -6,6 +6,7 @@ import AddPhotoModal from '@/components/photos/AddPhotoModal'
 import PasswordModal from '@/components/ui/PasswordModal'
 import { usePhotos } from '@/lib/hooks/usePhotos'
 import type { Photo } from '@/lib/data/photos'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface PhotoGalleryProps {
   photos: Photo[]
@@ -15,6 +16,7 @@ export default function PhotoGallery({ photos: staticPhotos }: PhotoGalleryProps
   const [gating, setGating] = useState(false)
   const [adding, setAdding] = useState(false)
   const { allPhotos, addPhoto, removePhoto, hidePhoto, updatePhotoAlt } = usePhotos(staticPhotos)
+  const { t } = useLanguage()
 
   const handleDelete = (id: string) => {
     const isUser = allPhotos.find((p) => p.id === id)?.isUser
@@ -28,10 +30,10 @@ export default function PhotoGallery({ photos: staticPhotos }: PhotoGalleryProps
         <button
           onClick={() => setGating(true)}
           className="flex items-center gap-2 font-cinzel text-[0.6rem] tracking-[0.15em] uppercase px-5 py-3 border border-[var(--border)] text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition-all duration-300 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
-          aria-label="Adicionar nova fotografia"
+          aria-label={t('galleryAddAria')}
         >
           <PlusIcon className="w-3.5 h-3.5" />
-          Nova Fotografia
+          {t('galleryAddLabel')}
         </button>
       </div>
 

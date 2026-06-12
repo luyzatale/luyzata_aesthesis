@@ -4,20 +4,22 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import ThemeToggle from '@/components/ui/ThemeToggle'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 import { cn } from '@/lib/utils'
-
-const navLinks = [
-  { href: '/',           label: 'Home' },
-  { href: '/aesthesis',  label: 'Aesthesis' },
-  { href: '/fotos',      label: 'Fotos' },
-  { href: '/sobre',      label: 'Sobre' },
-  { href: '/contato',    label: 'Contato' },
-]
 
 export default function Navigation() {
   const pathname = usePathname()
   const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const { lang, setLang, t } = useLanguage()
+
+  const navLinks = [
+    { href: '/',           label: 'Home' },
+    { href: '/aesthesis',  label: 'Aesthesis' },
+    { href: '/fotos',      label: t('fotosTitle') },
+    { href: '/sobre',      label: t('navLinkSobre') },
+    { href: '/contato',    label: t('navLinkContato') },
+  ]
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40)
@@ -56,7 +58,7 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className="hidden md:flex items-center gap-8" aria-label="Navegação principal">
+          <nav className="hidden md:flex items-center gap-8" aria-label={t('navAriaMain')}>
             {navLinks.map(({ href, label }) => {
               const isActive = pathname === href || (href !== '/' && pathname.startsWith(href))
               return (
@@ -78,12 +80,23 @@ export default function Navigation() {
           </nav>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Language toggle */}
+            <button
+              onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}
+              aria-label={t('navLangToggle')}
+              title={t('navLangToggle')}
+              className="hidden sm:flex items-center font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] rounded px-1"
+            >
+              <span className={cn('transition-colors', lang === 'pt' ? 'text-[var(--accent)]' : 'text-[var(--text-faint)]')}>PT</span>
+              <span className="mx-1 text-[var(--border-strong)]">|</span>
+              <span className={cn('transition-colors', lang === 'en' ? 'text-[var(--accent)]' : 'text-[var(--text-faint)]')}>EN</span>
+            </button>
             <ThemeToggle />
             {/* Hamburger */}
             <button
               onClick={() => setOpen((v) => !v)}
-              aria-label={open ? 'Fechar menu' : 'Abrir menu'}
+              aria-label={open ? t('navAriaClose') : t('navAriaOpen')}
               aria-expanded={open}
               className="md:hidden w-8 h-8 flex flex-col items-center justify-center gap-1.5 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
             >
@@ -110,7 +123,7 @@ export default function Navigation() {
             'absolute top-[var(--nav-h)] left-0 right-0 flex flex-col items-center gap-1 py-10 transition-transform duration-500',
             open ? 'translate-y-0' : '-translate-y-4'
           )}
-          aria-label="Navegação mobile"
+          aria-label={t('navAriaMobile')}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="w-16 h-px bg-[var(--border-strong)] mb-8" aria-hidden="true" />
@@ -131,7 +144,17 @@ export default function Navigation() {
             )
           })}
 
-          <div className="w-16 h-px bg-[var(--border-strong)] mt-8" aria-hidden="true" />
+          {/* Mobile language toggle */}
+          <button
+            onClick={() => setLang(lang === 'pt' ? 'en' : 'pt')}
+            className="mt-2 font-cinzel text-[0.55rem] tracking-[0.12em] uppercase text-[var(--text-faint)] hover:text-[var(--text-primary)] transition-colors focus-visible:outline-none py-4"
+          >
+            <span className={cn('transition-colors', lang === 'pt' ? 'text-[var(--accent)]' : '')}>PT</span>
+            <span className="mx-1.5 text-[var(--border-strong)]">|</span>
+            <span className={cn('transition-colors', lang === 'en' ? 'text-[var(--accent)]' : '')}>EN</span>
+          </button>
+
+          <div className="w-16 h-px bg-[var(--border-strong)] mt-4" aria-hidden="true" />
         </nav>
       </div>
     </>

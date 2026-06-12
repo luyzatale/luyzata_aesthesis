@@ -6,6 +6,7 @@ import Link from 'next/link'
 import ScrollBanner from '@/components/ui/ScrollBanner'
 import type { Poem } from '@/lib/data/poems'
 import { formatDateShort } from '@/lib/utils'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface FeaturedPoemProps {
   poem: Poem
@@ -14,12 +15,13 @@ interface FeaturedPoemProps {
 export default function FeaturedPoem({ poem }: FeaturedPoemProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-80px' })
+  const { t, locale } = useLanguage()
 
   return (
     <section
       ref={ref}
       className="py-24 px-6"
-      aria-label="Poema em destaque"
+      aria-label={t('featuredAriaSection')}
     >
       <div className="max-w-2xl mx-auto">
 
@@ -30,7 +32,7 @@ export default function FeaturedPoem({ poem }: FeaturedPoemProps) {
           transition={{ duration: 0.7 }}
           className="section-label text-center mb-10"
         >
-          Poema em Destaque
+          {t('featuredLabel')}
         </motion.p>
 
         {/* Scroll banner title */}
@@ -82,14 +84,14 @@ export default function FeaturedPoem({ poem }: FeaturedPoemProps) {
             dateTime={poem.date}
             className="font-cinzel text-[0.55rem] tracking-[0.15em] uppercase text-[var(--text-faint)]"
           >
-            {formatDateShort(poem.date)}
+            {formatDateShort(poem.date, locale)}
           </time>
 
           <Link
             href={`/aesthesis/${poem.slug}`}
             className="mt-4 font-cinzel text-[0.6rem] tracking-[0.18em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 flex items-center gap-2 group"
           >
-            Ler poema completo
+            {t('featuredReadMore')}
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Link>
         </motion.div>

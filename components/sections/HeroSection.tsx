@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { CornerOrnament } from '@/components/ui/OrnamentalDivider'
 import InkButton from '@/components/ui/InkButton'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 const container = {
   hidden: {},
@@ -31,11 +32,13 @@ const lineItem = {
 }
 
 export default function HeroSection() {
+  const { t } = useLanguage()
+
   return (
     <section
       className="relative min-h-screen flex items-center justify-center overflow-hidden px-6"
       style={{ paddingTop: 'var(--nav-h)' }}
-      aria-label="Início"
+      aria-label={t('heroAriaSection')}
     >
       {/* Corner ornaments */}
       <CornerOrnament
@@ -55,7 +58,6 @@ export default function HeroSection() {
         className="absolute bottom-10 right-6 w-14 h-14 text-[var(--accent)] opacity-40 pointer-events-none"
       />
 
-      {/* Border frame — subtle manuscript border */}
       <div
         className="absolute inset-6 pointer-events-none border border-[var(--border)] opacity-50 hidden lg:block"
         aria-hidden="true"
@@ -67,12 +69,10 @@ export default function HeroSection() {
         animate="show"
         className="max-w-2xl mx-auto text-center"
       >
-        {/* Subtitle label */}
         <motion.p variants={item} className="section-label mb-8">
           αἴσθησις
         </motion.p>
 
-        {/* Top ornamental line */}
         <motion.div
           variants={lineItem}
           className="flex items-center justify-center gap-4 mb-10"
@@ -83,7 +83,6 @@ export default function HeroSection() {
           <span className="block h-px w-20 bg-gradient-to-l from-transparent to-[var(--accent-warm)]" />
         </motion.div>
 
-        {/* Hero quote */}
         <motion.blockquote variants={item} className="mb-6">
           <p
             className="font-cormorant italic text-[var(--text-primary)] leading-[1.6]"
@@ -95,7 +94,6 @@ export default function HeroSection() {
           </p>
         </motion.blockquote>
 
-        {/* Attribution */}
         <motion.p
           variants={item}
           className="font-cinzel text-[0.6rem] tracking-[0.2em] uppercase text-[var(--text-muted)] mb-10"
@@ -103,7 +101,6 @@ export default function HeroSection() {
           — Fernando Pessoa
         </motion.p>
 
-        {/* Bottom ornamental line */}
         <motion.div
           variants={lineItem}
           className="flex items-center justify-center gap-4 mb-12"
@@ -114,24 +111,22 @@ export default function HeroSection() {
           <span className="block h-px w-20 bg-gradient-to-l from-transparent to-[var(--accent-warm)]" />
         </motion.div>
 
-        {/* Tagline */}
         <motion.p
           variants={item}
           className="font-cinzel text-[0.65rem] tracking-[0.22em] uppercase text-[var(--text-muted)] mb-12"
         >
-          Poesia&ensp;•&ensp;Fotografia&ensp;•&ensp;Reflexão
+          {t('heroTagline')}
         </motion.p>
 
-        {/* CTA buttons */}
         <motion.div
           variants={item}
           className="flex flex-wrap items-center justify-center gap-4"
         >
           <InkButton href="/aesthesis" variant="primary" size="md">
-            Entrar em Aesthesis
+            {t('heroCta1')}
           </InkButton>
           <InkButton href="/fotos" variant="outline" size="md">
-            Explorar Fotos
+            {t('heroCta2')}
           </InkButton>
         </motion.div>
 
@@ -143,19 +138,18 @@ export default function HeroSection() {
             href="/sobre"
             className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 ink-link"
           >
-            Sobre
+            {t('navLinkSobre')}
           </Link>
           <span className="text-[var(--border-strong)]" aria-hidden>·</span>
           <Link
             href="/contato"
             className="font-cinzel text-[0.6rem] tracking-[0.15em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 ink-link"
           >
-            Contato
+            {t('navLinkContato')}
           </Link>
         </motion.div>
       </motion.div>
 
-      {/* Scroll indicator */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

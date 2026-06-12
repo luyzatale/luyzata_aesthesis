@@ -5,6 +5,7 @@ import { useRef } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import type { Photo } from '@/lib/data/photos'
+import { useLanguage } from '@/lib/i18n/LanguageContext'
 
 interface LatestPhotosProps {
   photos: Photo[]
@@ -13,9 +14,10 @@ interface LatestPhotosProps {
 export default function LatestPhotos({ photos }: LatestPhotosProps) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-60px' })
+  const { t } = useLanguage()
 
   return (
-    <section ref={ref} className="py-24 px-6" aria-label="Fotografia recente">
+    <section ref={ref} className="py-24 px-6" aria-label={t('latestAriaSection')}>
       <div className="max-w-site mx-auto">
 
         {/* Header */}
@@ -25,15 +27,15 @@ export default function LatestPhotos({ photos }: LatestPhotosProps) {
           transition={{ duration: 0.7 }}
           className="text-center mb-14"
         >
-          <p className="section-label mb-4">Fotografia</p>
+          <p className="section-label mb-4">{t('latestLabel')}</p>
           <h2
             className="font-cinzel text-[var(--text-primary)]"
             style={{ fontSize: 'clamp(1.25rem, 2.5vw, 1.875rem)' }}
           >
-            Imagens Recentes
+            {t('latestTitle')}
           </h2>
           <p className="font-cormorant italic text-[var(--text-muted)] mt-3 text-lg">
-            Uma extensão visual da experiência poética.
+            {t('latestSub')}
           </p>
         </motion.div>
 
@@ -67,7 +69,7 @@ export default function LatestPhotos({ photos }: LatestPhotosProps) {
             href="/fotos"
             className="font-cinzel text-[0.65rem] tracking-[0.18em] uppercase text-[var(--text-muted)] hover:text-[var(--accent)] transition-colors duration-300 flex items-center justify-center gap-2 group"
           >
-            Ver galeria completa
+            {t('latestCta')}
             <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">→</span>
           </Link>
         </motion.div>
